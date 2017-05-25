@@ -1,10 +1,18 @@
 package com.madgag.gif.fmsware;
 
-import java.net.*;
-import java.io.*;
-import java.util.*;
-import java.awt.*;
-import java.awt.image.*;
+import java.awt.AlphaComposite;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
 
 /**
  * Class GifDecoder - Decodes a GIF file into one or more frames.
@@ -59,11 +67,8 @@ class GifDecoder {
     private int bgIndex; // background color index
     private int bgColor; // background color
     private int lastBgColor; // previous bg color
-    private int pixelAspect; // pixel aspect ratio
 
-    private boolean lctFlag; // local color table flag
     private boolean interlace; // interlace flag
-    private int lctSize; // local color table size
 
     private int ix;
     private int iy;
@@ -93,7 +98,7 @@ class GifDecoder {
     private byte[] pixelStack;
     private byte[] pixels;
 
-    private ArrayList frames; // frames read from current file
+    private ArrayList<GifFrame> frames; // frames read from current file
     private int frameCount;
 
     static class GifFrame {
@@ -265,7 +270,7 @@ class GifDecoder {
     /**
      * Reads GIF image from stream
      *
-     * @param BufferedInputStream containing GIF file.
+     * @param is BufferedInputStream containing GIF file.
      * @return read status code (0 = no errors)
      */
     private int read(BufferedInputStream is) {
@@ -292,7 +297,7 @@ class GifDecoder {
     /**
      * Reads GIF image from stream
      *
-     * @param InputStream containing GIF file.
+     * @param is  InputStream containing GIF file.
      * @return read status code (0 = no errors)
      */
     public int read(InputStream is) {
@@ -664,11 +669,11 @@ class GifDecoder {
         ih = readShort();
 
         int packed = read();
-        lctFlag = (packed & 0x80) != 0; // 1 - local color table flag
+        boolean lctFlag = (packed & 0x80) != 0;
         interlace = (packed & 0x40) != 0; // 2 - interlace flag
         // 3 - sort flag
         // 4-5 - reserved
-        lctSize = 2 << (packed & 7); // 6-8 - local color table size
+        int lctSize = 2 << (packed & 7);
 
         if (lctFlag) {
             lct = readColorTable(lctSize); // read table
@@ -729,7 +734,7 @@ class GifDecoder {
         gctSize = 2 << (packed & 7); // 6-8 : gct size
 
         bgIndex = read(); // background color index
-        pixelAspect = read(); // pixel aspect ratio
+        int pixelAspect = read();
     }
 
     /**

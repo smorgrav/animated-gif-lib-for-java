@@ -18,9 +18,9 @@ package com.madgag.gif.fmsware;
  * and/or sell copies of the Software, and to permit persons who receive
  * copies from any such party to do so, with the only requirement being
  * that this copyright notice remain intact.
+ *
+ * Ported to Java 12/00 K Weiner
  */
-
-// Ported to Java 12/00 K Weiner
 class NeuQuant {
 
     private static final int netsize = 256; /* number of colours used */
@@ -48,7 +48,7 @@ class NeuQuant {
 	   write output image using inxsearch(b,g,r)      */
 
 	/* Network Definitions
-	   ------------------- */
+       ------------------- */
 
     private static final int maxnetpos = (netsize - 1);
     private static final int netbiasshift = 4; /* bias for colour values */
@@ -74,8 +74,6 @@ class NeuQuant {
     /* defs for decreasing alpha factor */
     private static final int alphabiasshift = 10; /* alpha starts at 1.0 */
     private static final int initalpha = (1 << alphabiasshift);
-
-    private int alphadec; /* biased by 10 bits */
 
     /* radbias and alpharadbias used for radpower calculation */
     private static final int radbiasshift = 8;
@@ -203,7 +201,7 @@ class NeuQuant {
 
         if (lengthcount < minpicturebytes)
             samplefac = 1;
-        alphadec = 30 + ((samplefac - 1) / 3);
+        int alphadec = 30 + ((samplefac - 1) / 3);
         p = thepicture;
         pix = 0;
         lim = lengthcount;
