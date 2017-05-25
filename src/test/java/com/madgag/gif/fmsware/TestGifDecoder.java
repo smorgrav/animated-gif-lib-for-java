@@ -1,13 +1,13 @@
 package com.madgag.gif.fmsware;
 
-import static org.fest.assertions.api.Assertions.assertThat;
 import org.junit.Test;
 import sun.misc.IOUtils;
 
 import javax.imageio.ImageIO;
-
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+
+import static org.fest.assertions.api.Assertions.assertThat;
 
 public class TestGifDecoder {
 
