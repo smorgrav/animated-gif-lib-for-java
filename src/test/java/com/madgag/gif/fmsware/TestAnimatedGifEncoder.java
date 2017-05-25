@@ -1,18 +1,18 @@
 package com.madgag.gif.fmsware;
 
+import org.junit.Before;
+import org.junit.Test;
+
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import javax.imageio.ImageIO;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import static java.awt.Color.BLUE;
-import static java.awt.Color.GREEN;
-import static java.awt.Color.RED;
+import static com.madgag.gif.fmsware.Color.BLUE;
+import static com.madgag.gif.fmsware.Color.GREEN;
+import static com.madgag.gif.fmsware.Color.RED;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 public class TestAnimatedGifEncoder {

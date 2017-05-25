@@ -1,6 +1,6 @@
 package com.madgag.gif.fmsware;
 
-import java.awt.Color;
+
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
@@ -362,7 +362,7 @@ class AnimatedGifEncoder {
             BufferedImage temp =
                     new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
             Graphics2D g = temp.createGraphics();
-            g.setColor(background);
+            g.setColor(background == null ? null : new java.awt.Color(background.getRGB()));
             g.fillRect(0, 0, width, height);
             g.drawImage(image, 0, 0, null);
             image = temp;

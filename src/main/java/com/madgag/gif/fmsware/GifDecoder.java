@@ -1,7 +1,6 @@
 package com.madgag.gif.fmsware;
 
 import java.awt.AlphaComposite;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -190,7 +189,7 @@ class GifDecoder {
                     } else {
                         c = new Color(lastBgColor); // use given background color
                     }
-                    g.setColor(c);
+                    g.setColor(new java.awt.Color(c.getRGB()));
                     g.setComposite(AlphaComposite.Src); // replace area
                     g.fill(lastRect);
                     g.dispose();
