@@ -1,11 +1,13 @@
 package com.madgag.gif.fmsware;
 
 /**
+ * Shamelessly stolen parts of the java.awt.Color class.
+ *
  * @author smorgrav
  */
 public class Color {
 
-    int value;
+    final int value;
 
     public static Color BLUE = new Color(0,0,255);
     public static Color RED = new Color(255,0,0);
@@ -164,5 +166,14 @@ public class Color {
      */
     public int getRGB() {
         return value;
+    }
+
+    static Color blend(Color a, Color b) {
+        int rOut = (a.getRed() * a.getAlpha() / 255) + (b.getRed() * b.getAlpha() * (255 - a.getAlpha()) / (255*255));
+        int gOut = (a.getGreen() * a.getAlpha() / 255) + (b.getGreen() * b.getAlpha() * (255 - a.getAlpha()) / (255*255));
+        int bOut = (a.getBlue() * a.getAlpha() / 255) + (b.getBlue() * b.getAlpha() * (255 - a.getAlpha()) / (255*255));
+        int aOut = a.getAlpha() + (b.getAlpha() * (255 - a.getAlpha()) / 255);
+
+        return new Color(rOut, gOut, bOut, aOut);
     }
 }

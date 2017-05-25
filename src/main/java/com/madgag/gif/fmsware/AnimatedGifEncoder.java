@@ -1,9 +1,5 @@
 package com.madgag.gif.fmsware;
 
-
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -40,7 +36,7 @@ class AnimatedGifEncoder {
     private int delay = 0; // frame delay (hundredths)
     private boolean started = false; // ready to output frames
     private OutputStream out;
-    private BufferedImage image; // current frame
+    private Bitmap image; // current frame
     private byte[] pixels; // BGR byte array from frame
     private byte[] indexedPixels; // converted frame indexed to palette
     private int colorDepth; // number of bit planes
@@ -132,7 +128,7 @@ class AnimatedGifEncoder {
      * @param im BufferedImage containing frame to write.
      * @return true if successful.
      */
-    public boolean addFrame(BufferedImage im) {
+    public boolean addFrame(Bitmap im) {
         if ((im == null) || !started) {
             return false;
         }
@@ -354,20 +350,17 @@ class AnimatedGifEncoder {
     private void getImagePixels() {
         int w = image.getWidth();
         int h = image.getHeight();
-        int type = image.getType();
-        if ((w != width)
-                || (h != height)
-                || (type != BufferedImage.TYPE_3BYTE_BGR)) {
-            // create new image with right size/format
-            BufferedImage temp =
-                    new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
-            Graphics2D g = temp.createGraphics();
-            g.setColor(background == null ? null : new java.awt.Color(background.getRGB()));
-            g.fillRect(0, 0, width, height);
-            g.drawImage(image, 0, 0, null);
+        //int type = image.getType();
+        if ((w != width) || (h != height)){
+
+            Bitmap temp = new Bitmap(width, height);
+            if (background != null) {
+                temp.fill(background);
+            }
+            temp.draw(image, 0, 0);
             image = temp;
         }
-        pixels = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
+        pixels = image.getBGRPixels();
     }
 
     /**

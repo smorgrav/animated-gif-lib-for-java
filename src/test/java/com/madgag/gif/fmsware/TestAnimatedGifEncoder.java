@@ -5,6 +5,7 @@ import org.junit.Test;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferInt;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -19,8 +20,8 @@ public class TestAnimatedGifEncoder {
 
     private ByteArrayOutputStream outputStream;
     private AnimatedGifEncoder encoder;
-    private BufferedImage sonic1;
-    private BufferedImage sonic2;
+    private Bitmap sonic1;
+    private Bitmap sonic2;
 
     @Before
     public void setUp() throws IOException {
@@ -74,7 +75,6 @@ public class TestAnimatedGifEncoder {
         assertEncodedImageIsEqualTo("/sonic-green-bg-blue-transparent.gif");
     }
 
-
     private void encodeSampleSonicFrames() {
         encoder.setRepeat(0);
         encoder.setDelay(400);
@@ -103,7 +103,16 @@ public class TestAnimatedGifEncoder {
         return expectedBytes;
     }
 
-    private BufferedImage getImage(String name) throws IOException {
-        return ImageIO.read(new File(getClass().getResource(name).getFile()));
+    private Bitmap getImage(String name) throws IOException {
+        BufferedImage image =  ImageIO.read(new File(getClass().getResource(name).getFile()));
+
+        if (image.getType() != BufferedImage.TYPE_INT_ARGB) {
+            BufferedImage tmp = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
+            tmp.getGraphics().drawImage(image, 0, 0, null);
+            image = tmp;
+        }
+
+        int[] outPixels = ((DataBufferInt)image.getRaster().getDataBuffer()).getData();
+        return new Bitmap(image.getWidth(), image.getHeight(), outPixels);
     }
 }
