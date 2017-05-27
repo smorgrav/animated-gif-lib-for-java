@@ -5,13 +5,13 @@ package com.madgag.gif.fmsware;
  *
  * @author smorgrav
  */
-public class Color {
+class Color {
 
-    final int value;
+    private final int value;
 
-    public static Color BLUE = new Color(0,0,255);
-    public static Color RED = new Color(255,0,0);
-    public static Color GREEN = new Color(0,255,0);
+    static Color BLUE = new Color(0,0,255);
+    static Color RED = new Color(255,0,0);
+    static Color GREEN = new Color(0,255,0);
 
     /**
      * Checks the color integer components supplied for validity.
@@ -110,7 +110,7 @@ public class Color {
      * @see #getBlue
      * @see #getRGB
      */
-    public Color(int rgb) {
+    Color(int rgb) {
         value = 0xff000000 | rgb;
     }
 
@@ -120,7 +120,7 @@ public class Color {
      * @return the red component.
      * @see #getRGB
      */
-    public int getRed() {
+    int getRed() {
         return (getRGB() >> 16) & 0xFF;
     }
 
@@ -130,7 +130,7 @@ public class Color {
      * @return the green component.
      * @see #getRGB
      */
-    public int getGreen() {
+    int getGreen() {
         return (getRGB() >> 8) & 0xFF;
     }
 
@@ -140,7 +140,7 @@ public class Color {
      * @return the blue component.
      * @see #getRGB
      */
-    public int getBlue() {
+    int getBlue() {
         return (getRGB() >> 0) & 0xFF;
     }
 
@@ -149,7 +149,7 @@ public class Color {
      * @return the alpha component.
      * @see #getRGB
      */
-    public int getAlpha() {
+    int getAlpha() {
         return (getRGB() >> 24) & 0xff;
     }
 
@@ -164,7 +164,7 @@ public class Color {
      * @see #getBlue
      * @since JDK1.0
      */
-    public int getRGB() {
+    int getRGB() {
         return value;
     }
 

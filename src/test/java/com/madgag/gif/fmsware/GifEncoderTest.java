@@ -16,10 +16,10 @@ import static com.madgag.gif.fmsware.Color.GREEN;
 import static com.madgag.gif.fmsware.Color.RED;
 import static org.fest.assertions.api.Assertions.assertThat;
 
-public class TestAnimatedGifEncoder {
+public class GifEncoderTest {
 
     private ByteArrayOutputStream outputStream;
-    private AnimatedGifEncoder encoder;
+    private GifEncoder encoder;
     private Bitmap sonic1;
     private Bitmap sonic2;
 
@@ -29,7 +29,7 @@ public class TestAnimatedGifEncoder {
         sonic2 = getImage("/sonic2.png");
 
         outputStream = new ByteArrayOutputStream();
-        encoder = new AnimatedGifEncoder();
+        encoder = new GifEncoder();
         encoder.start(outputStream);
     }
 
@@ -113,6 +113,6 @@ public class TestAnimatedGifEncoder {
         }
 
         int[] outPixels = ((DataBufferInt)image.getRaster().getDataBuffer()).getData();
-        return new Bitmap(image.getWidth(), image.getHeight(), outPixels);
+        return new Bitmap(image.getWidth(), image.getHeight(), 0,0, outPixels);
     }
 }
