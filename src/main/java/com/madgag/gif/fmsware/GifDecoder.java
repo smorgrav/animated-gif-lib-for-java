@@ -2,6 +2,7 @@ package com.madgag.gif.fmsware;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Class GifDecoder - Decodes a GIF file into one or more frames.
@@ -37,16 +38,16 @@ class GifDecoder {
      * @param is BufferedInputStream containing GIF file.
      * @return read status code (0 = no errors)
      */
-    public static GifImage decode(BufferedInputStream is) {
-        GifDecoder decoder = new GifDecoder(is);
+    public static GifImage decode(InputStream is) {
+        GifDecoder decoder = new GifDecoder(new BufferedInputStream(is));
         return decoder.decode();
     }
 
-    GifDecoder(BufferedInputStream is) {
+    private GifDecoder(BufferedInputStream is) {
         this.in = is;
     }
 
-    public GifImage decode() {
+    private GifImage decode() {
         GifImage image = readHeaderAndInitImage();
         readContentBlocks(image);
         return image;
@@ -139,18 +140,19 @@ class GifDecoder {
         }
     }
 
+
     /**
-     * Map pixels as colors on the subImage
-     * - draw this subImage onto the final frame.
+     * Untangle the interlaced layout
      */
-    private void populateBitmap(byte[] pixels, Bitmap subImage, GifFrame frame) {
+    private static byte[] interlaceRevert(byte[] interlacedPixels, int width, int height) {
+        byte[] indexedPixels = new byte[interlacedPixels.length];
         int pass = 1;
         int inc = 8;
         int iline = 0;
-        for (int i = 0; i < subImage.getHeight(); i++) {
+        for (int i = 0; i < height; i++) {
             int line = i;
-            if (frame.isInterlaced()) {
-                if (iline >= subImage.getHeight()) {
+
+                if (iline >= height) {
                     pass++;
                     switch (pass) {
                         case 2:
@@ -167,21 +169,16 @@ class GifDecoder {
                 }
                 line = iline;
                 iline += inc;
-            }
 
-            if (line < subImage.getHeight()) {
-                for (int sx = 0; sx < subImage.getWidth(); sx++) {
-                    int index = ((int) pixels[line*subImage.getWidth() + sx]) & 0xff;
-                    Color color = frame.getColor(index);
-                    if (color != null) {
-                        subImage.setPixel(sx, line, color);
-                    }
+
+            if (line < height) {
+                for (int sx = 0; sx < width; sx++) {
+                    int index = line*width + sx;
+                    indexedPixels[index] = interlacedPixels[index];
                 }
             }
         }
-
-        // Now we have populated the tempImage bitmap - draw this onto the targetFrame
-        frame.draw(subImage);
+        return indexedPixels;
     }
 
     /**
@@ -337,7 +334,7 @@ class GifDecoder {
         if (n < nbytes) {
             throw new GifFormatException("Colortable size (" + ncolors + ") less than actual bytes read (" + n + ")");
         } else {
-            tab = new int[256]; // max size to avoid bounds checks
+            tab = new int[ncolors]; // max size to avoid bounds checks
             int i = 0;
             int j = 0;
             while (i < ncolors) {
@@ -363,7 +360,7 @@ class GifDecoder {
         gce.setUserInputFlag((packed & 2) != 0);
 
         gce.setDelay(readShort() * 10);
-        gce.setTransparcyIndex(read());
+        gce.setTransparcyIndex((byte)read());
 
         read(); // block terminator
 
@@ -375,28 +372,25 @@ class GifDecoder {
      */
     private void readImage(GifImage image, GifGraphicControlExt gce) {
         //
-        // Read frame dimensions and position - create a temporary bitmap this this
+        // Read frame dimensions and position
         //
-        int ix = readShort(); // (sub)image position & size
+        int ix = readShort();
         int iy = readShort();
         int iw = readShort();
         int ih = readShort();
-        Bitmap tempImage = new Bitmap(iw, ih, ix, iy);
 
         //
         // Get interlace and colortable info
         //
         int packed = read();
-        boolean lctFlag = (packed & 0x80) != 0;    // 1 - local colortable flag
-        boolean interlace = (packed & 0x40) != 0;  // 2 - interlace flag
-                                                   // 3 - sort flag
-                                                   // 4-5 - reserved
+        boolean lctFlag = (packed & 0x80) != 0;
+        boolean interlace = (packed & 0x40) != 0;
         int lctSize = 2 << (packed & 7);
 
         //
         // Read colortable if flag is set
         //
-        GifColorTable colorTable = null;
+        GifColorTable colorTable = image.gct;
         if (lctFlag) {
             int[] lct = readColorTable(lctSize); // read table
             colorTable = new GifColorTable(lct, 0); //TODO background index
@@ -409,11 +403,26 @@ class GifDecoder {
         skip();
 
         //
-        // We have enough info to create the frame now.
-        // Map the pixel data onto the tempBitmap and draw this onto the final frame bitmap
+        // If interlaced - untangle that
         //
-        GifFrame frame = image.newFrame(gce, colorTable, interlace);
-        populateBitmap(pixels, tempImage, frame);
+        if (interlace) {
+            pixels = interlaceRevert(pixels, iw, ih);
+        }
+
+        //
+        // Convert byte index to int as we don't have unsigned datatypes in java
+        //
+        int[] indexedPixels = new int[pixels.length];
+        for (int i = 0; i < pixels.length; i++) {
+            indexedPixels[i] = (int)pixels[i] & 0xff;
+        }
+
+        //
+        // Wrap up
+        //
+        Bitmap bitmap = new Bitmap(iw, ih, ix, iy, colorTable, indexedPixels);
+        GifFrame newFrame = new GifFrame(bitmap, gce, interlace);
+        image.frames.add(newFrame);
     }
 
     /**

@@ -2,16 +2,11 @@ package com.madgag.gif.fmsware;
 
 import org.junit.Test;
 
-import java.io.BufferedInputStream;
-import java.io.InputStream;
-
 public class GifDecoderTest {
 
     @Test
     public void testDecodingGifWithDeferredClearCodesInLZWCompression() throws Exception {
-        InputStream is = getClass().getResourceAsStream("/brucelee.gif");
-        GifDecoder decoder = new GifDecoder(new BufferedInputStream(is));
-        GifImage image = decoder.decode();
+        GifImage image = GifDecoder.decode(getClass().getResourceAsStream("/brucelee.gif"));
 
         /*BufferedImage image = null;//decoder.getBitmap();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

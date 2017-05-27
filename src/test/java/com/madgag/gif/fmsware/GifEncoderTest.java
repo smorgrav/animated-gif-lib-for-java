@@ -1,24 +1,8 @@
 package com.madgag.gif.fmsware;
 
-import org.junit.Before;
-import org.junit.Test;
-
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-
-import static com.madgag.gif.fmsware.Color.BLUE;
-import static com.madgag.gif.fmsware.Color.GREEN;
-import static com.madgag.gif.fmsware.Color.RED;
-import static org.fest.assertions.api.Assertions.assertThat;
-
 public class GifEncoderTest {
 
-    private ByteArrayOutputStream outputStream;
+   /* private ByteArrayOutputStream outputStream;
     private GifEncoder encoder;
     private Bitmap sonic1;
     private Bitmap sonic2;
@@ -114,5 +98,5 @@ public class GifEncoderTest {
 
         int[] outPixels = ((DataBufferInt)image.getRaster().getDataBuffer()).getData();
         return new Bitmap(image.getWidth(), image.getHeight(), 0,0, outPixels);
-    }
+    }*/
 }

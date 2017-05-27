@@ -11,34 +11,22 @@ class Bitmap {
 
     private final int width;
     private final int height;
-    private final Color[] pixels; /** Mutable set of colors pr pixel in column/row aka offsetx/y order */
-    private final int offsetx; /** if this is a subimage - the offsetx/column position on the larger image */
-    private final int offsety; /** if this is a subimage - the y/row position on the larger image */
+    private final int[] colorIndices; /** The pixels as indices into the colortable. -1 means unset */
+    private final int offsetx; /**  offsetx/column/x position on the larger image */
+    private final int offsety; /**  offsety/row/y position on the larger image */
+    private final GifColorTable colorTable;
+    private final boolean hasTransparency;
+    private final int transparentColorIndex;
 
-    Bitmap(int width, int height) {
-        this(width, height, 0,0, new int[width*height]);
-    }
-
-    Bitmap(int width, int height, int offsetx, int offsety) {
-        this(width, height, offsetx, offsety, new int[width*height]);
-    }
-
-    Bitmap(int width, int height, int offsetx, int offsety, int[] argb) {
+    Bitmap(int width, int height, int offsetx, int offsety, GifColorTable colorTable, int[] indexedPixels) {
         this.width = width;
         this.height = height;
-        this.pixels = new Color[width*height];
-        for (int i = 0; i < width*height; i++) {
-            pixels[i] = new Color(argb[i]);
-        }
+        this.colorIndices = indexedPixels;
         this.offsetx = offsetx;
         this.offsety = offsety;
-    }
-
-    /** Fill the entire bitmap with the specified color */
-    void fill(Color c) {
-        for (int i = 0; i < width*height; i++) {
-            pixels[i] = c;
-        }
+        this.colorTable = colorTable;
+        this.hasTransparency = false;
+        this.transparentColorIndex = 0;
     }
 
     /**
@@ -60,8 +48,8 @@ class Bitmap {
             for (int y = 0; y < source.height; y++) {
                 int sourceIndex = y*source.width + x;
                 int targetIndex = (source.offsety+y)*width + source.offsetx +x;
-                if (source.pixels[sourceIndex] != null) { // if not transparent
-                    pixels[targetIndex] = source.pixels[sourceIndex];
+                if (!source.hasTransparency || source.colorIndices[sourceIndex] != source.transparentColorIndex) {
+                    colorIndices[targetIndex] = source.colorIndices[sourceIndex];
                 }
             }
         }
@@ -75,18 +63,22 @@ class Bitmap {
         return height;
     }
 
-    void setPixel(int x, int y, Color color) {
-        int pos = y*width+x;
-        pixels[pos] = color;
+    int getOffsetX() {
+        return offsetx;
     }
 
-    byte[] getBGRPixels() {
-        byte[] bgr = new byte[width*height*3];
-        for (int i = 0; i < width*height; i++) {
-            bgr[i*3 + 0] = (byte)pixels[i].getBlue();
-            bgr[i*3 + 1] = (byte)pixels[i].getGreen();
-            bgr[i*3 + 2] = (byte)pixels[i].getRed();
-        }
-        return bgr;
+    int getOffsetY() {
+        return offsetx;
+    }
+
+    void setPixel(int x, int y, int colorIndex) {
+        int pos = y*width+x;
+        colorIndices[pos] = colorIndex;
+    }
+
+    GifColorTable getColorTable() { return colorTable; }
+
+    int[] getColorIndices() {
+        return colorIndices;
     }
 }
