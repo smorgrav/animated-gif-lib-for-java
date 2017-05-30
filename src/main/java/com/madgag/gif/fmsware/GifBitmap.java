@@ -3,7 +3,7 @@ package com.madgag.gif.fmsware;
 /**
  * Not just a bitmap but a bitmap of indexed colors, the color table the indices refers to
  * and the meta data to position the bitmap onto other bitmaps.
- *
+ * <p>
  * Also handle transparency color (which means skip pixel with this color set).
  *
  * @author smorgrav
@@ -31,19 +31,19 @@ class GifBitmap {
     }
 
     /**
-     * Render/populate the colors from this bitmap onto a argb array.
-     *
+     * Render/populate the colors from this bitmap onto a argb int array.
+     * <p>
      * The array layout must be equal or larger than this bitmap
      */
     void renderTo(int[] argb, int argbWidth) {
-        if (argb.length < width*height) {
+        if (argb.length < width * height) {
             throw new IllegalArgumentException("The target argb array is too small: " + argb.length);
         }
 
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                int sourceIndex = y*width + x;
-                int targetIndex = (offsety+y)*argbWidth + offsetx + x;
+                int sourceIndex = y * width + x;
+                int targetIndex = (offsety + y) * argbWidth + offsetx + x;
                 // Only set color on target if the current pixel is not transparent
                 if (!hasTransparency || transparentColorIndex != colorIndices[sourceIndex]) {
                     int colorIndex = colorIndices[sourceIndex];
@@ -55,12 +55,13 @@ class GifBitmap {
     }
 
     /**
-     * Render/populate the background color from this bitmap onto a argb array.
+     * Render/populate the area represented by this bitmap with a color
+     * (usually the background color) onto a argb int array.
      */
     void renderWithColorTo(int[] argb, int argbWidth, int color) {
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
-                int targetIndex = (offsety+y)*argbWidth + offsetx + x;
+                int targetIndex = (offsety + y) * argbWidth + offsetx + x;
                 argb[targetIndex] = color;
             }
         }
@@ -74,7 +75,9 @@ class GifBitmap {
         return height;
     }
 
-    GifColorTable getColorTable() { return colorTable; }
+    GifColorTable getColorTable() {
+        return colorTable;
+    }
 
     int[] getColorIndices() {
         return colorIndices;
