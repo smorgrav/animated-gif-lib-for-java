@@ -236,9 +236,11 @@ class NeuQuant {
 
         i = 0;
         while (i < samplepixels) {
-            b = (p[pix + 0] & 0xff) << netbiasshift;
+            // NOTE changed the otiginal input  layout assumption from BRG to RGB.
+            r = (p[pix + 0] & 0xff) << netbiasshift;
             g = (p[pix + 1] & 0xff) << netbiasshift;
-            r = (p[pix + 2] & 0xff) << netbiasshift;
+            b = (p[pix + 2] & 0xff) << netbiasshift;
+
             j = contest(b, g, r);
 
             altersingle(alpha, j, b, g, r);

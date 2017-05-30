@@ -7,6 +7,13 @@ import static com.madgag.gif.fmsware.GifGraphicControlExt.DisposeMethod.RESTORE_
  */
 class GifGraphicControlExt {
 
+    private DisposeMethod dispose = DisposeMethod.DO_NOT_DISPOSE;
+    private boolean userInputFlag = false;
+    private boolean isTransparent = false;
+    private int transparcyIndex = 0;
+    private int delay = 0;
+
+
     static GifGraphicControlExt DEFAULT = new GifGraphicControlExt();
 
     enum DisposeMethod {
@@ -16,14 +23,8 @@ class GifGraphicControlExt {
         RESTORE_TO_PREVIOUS,
     }
 
-    private DisposeMethod dispose = DisposeMethod.DO_NOT_DISPOSE;
-    private boolean userInputFlag = false;
-    private boolean isTransparent = false;
-    private int transparcyIndex = 0;
-    private int delay = 0;
-
     int getDisposeValue() {
-        switch(dispose) {
+        switch (dispose) {
             case NON_SPECIFIED:
                 return 0;
             case DO_NOT_DISPOSE:
@@ -38,7 +39,7 @@ class GifGraphicControlExt {
     }
 
     void setDisposeFromValue(int value) {
-        switch(value) {
+        switch (value) {
             case 0:
                 dispose = DisposeMethod.NON_SPECIFIED;
                 break;
@@ -56,43 +57,35 @@ class GifGraphicControlExt {
         }
     }
 
-    public boolean hasTransparency() {
+    boolean hasTransparency() {
         return isTransparent;
     }
 
-    public void setTransparent(boolean isTransparent) {
+    void setTransparent(boolean isTransparent) {
         this.isTransparent = isTransparent;
     }
 
-    public DisposeMethod getDispose() {
+    DisposeMethod getDispose() {
         return dispose;
     }
 
-    public void setDispose(DisposeMethod dispose) {
-        this.dispose = dispose;
-    }
-
-    public boolean isUserInputFlag() {
-        return userInputFlag;
-    }
-
-    public void setUserInputFlag(boolean userInputFlag) {
+    void setUserInputFlag(boolean userInputFlag) {
         this.userInputFlag = userInputFlag;
     }
 
-    public int getTransparcyIndex() {
+    int getTransparcyIndex() {
         return transparcyIndex;
     }
 
-    public void setTransparcyIndex(int transparcyIndex) {
+    void setTransparcyIndex(int transparcyIndex) {
         this.transparcyIndex = transparcyIndex;
     }
 
-    public int getDelay() {
+    int getDelay() {
         return delay;
     }
 
-    public void setDelay(int delay) {
-        this.delay = delay;
+    void setDelay(int delay_tenth_ms) {
+        this.delay = delay_tenth_ms;
     }
 }

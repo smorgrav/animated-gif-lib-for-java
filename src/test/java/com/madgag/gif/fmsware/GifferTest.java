@@ -13,7 +13,10 @@ public class GifferTest {
     public void encode_decode_roundtrips() throws IOException{
         byte[] originalfile = getByteArray(getClass().getResourceAsStream("/brucelee.gif"));
         GifImage image = GifDecoder.decode(getClass().getResourceAsStream("/brucelee.gif"));
-        ByteArrayOutputStream baos = new ByteArrayOutputStream(100000);
+        //FileOutputStream baos = new FileOutputStream("/Users/smorgrav/dev/privat/test.gif");
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(10000);
+
         GifEncoder.encode(image, baos);
         byte[] firstTripDround = baos.toByteArray();
 
@@ -23,6 +26,7 @@ public class GifferTest {
                 break;
             }
         }
+
         Assert.assertArrayEquals(originalfile, firstTripDround);
     }
 

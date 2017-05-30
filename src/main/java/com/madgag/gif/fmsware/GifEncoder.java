@@ -4,58 +4,65 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * Class GifEncoder - Encodes a GIF file consisting of one or
- * more frames.
- * <pre>
- * Example:
- *    GifEncoder e = new GifEncoder();
- *    e.start(outputFileName);
- *    e.setDelay(1000);   // 1 frame per sec
- *    e.addFrame(image1);
- *    e.addFrame(image2);
- *    e.finish();
- * </pre>
- * No copyright asserted on the source code of this class.  May be used
- * for any purpose, however, refer to the Unisys LZW patent for restrictions
- * on use of the associated LZWEncoder class.  Please forward any corrections
- * to questions at fmsware.com.
+ * Write a GifImage to an outputstream.
  *
+ * @see GifImage
+ *
+ * @author smorgrav
  * @author Kevin Weiner, FM Software
- * @version 1.03 November 2003
+ * @version 2
  */
 class GifEncoder {
 
     private OutputStream out;
-    private GifImage image;
 
-    public static void encode(GifImage image, OutputStream out) throws IOException {
-        GifEncoder encoder = new GifEncoder(image, out);
-        encoder.encode();
+    static void encode(GifImage image, OutputStream out) throws IOException {
+        GifEncoder encoder = new GifEncoder(out);
+        encoder.encode(image);
     }
 
-    private GifEncoder(GifImage image, OutputStream out) {
+    static void encode(GifFrame frame, OutputStream out) throws IOException {
+        GifEncoder encoder = new GifEncoder(out);
+        encoder.encode(frame);
+    }
+
+    private GifEncoder(OutputStream out) {
         this.out = out;
-        this.image = image;
     }
 
-    private void encode() throws IOException {
+    private void encode(GifImage image) throws IOException {
         writeString(image.version);
-        writeLogicalScreenDescription();
+        writeLogicalScreenDescription(image);
+
+        // Global color tabel is optional
         if (image.gct != null) {
             writeColorTable(image.gct);
         }
-        if (image.loopCount != 0) {
-            writeNetscapeExt();
+
+        // Standard GIF spec is to run through the images once
+        if (image.loopCount != 1) {
+            writeNetscapeExt(image);
         }
 
+
         for (GifFrame frame : image.frames) {
-            writeGraphicCtrlExt(frame.getGraphicControlExt());
-            writeImageDesc(frame.getBitmap());
-            if (!frame.getBitmap().getColorTable().equals(image.gct)) {
-                writeColorTable(frame.getBitmap().getColorTable());
-            }
-            writeBitmap(frame.getBitmap());
+            encode(frame);
         }
+    }
+
+    void encode(GifFrame frame) throws IOException {
+        if (frame.hasGraphicControlExt()) {
+            writeGraphicCtrlExt(frame.getGraphicControlExt());
+        }
+
+        writeImageDesc(frame.getBitmap(), frame.getGraphicControlExt());
+
+        // Write colortable only if it is local (not global)
+        if (!frame.getBitmap().getColorTable().isGlobal()) {
+            writeColorTable(frame.getBitmap().getColorTable());
+        }
+
+        writeBitmap(frame.getBitmap());
     }
 
     /**
@@ -80,7 +87,7 @@ class GifEncoder {
     /**
      * Writes Logical Screen Descriptor
      */
-    private void writeLogicalScreenDescription() throws IOException {
+    private void writeLogicalScreenDescription(GifImage image) throws IOException {
         // logical screen size
         writeShort(image.width);
         writeShort(image.height);
@@ -92,7 +99,7 @@ class GifEncoder {
         int colorTableSorted = 0;
         if (image.gct != null) {
             gctEnabled = 0x80;
-            gctSize = (31 - Integer.numberOfLeadingZeros(image.gct.table.length)) - 1;
+            gctSize = (31 - Integer.numberOfLeadingZeros(image.gct.getSize())) - 1;
         }
 
         int packed = gctEnabled | colorDepth | colorTableSorted | gctSize;
@@ -106,7 +113,7 @@ class GifEncoder {
      * Writes Netscape application extension to define
      * repeat count.
      */
-    private void writeNetscapeExt() throws IOException {
+    private void writeNetscapeExt(GifImage image) throws IOException {
         out.write(0x21); // extension introducer
         out.write(0xff); // app extension label
         out.write(11); // block size
@@ -120,43 +127,38 @@ class GifEncoder {
     /**
      * Writes Image Descriptor
      */
-    private void writeImageDesc(Bitmap bitmap) throws IOException {
+    private void writeImageDesc(GifBitmap bitmap, GifGraphicControlExt gct) throws IOException {
         out.write(0x2c); // image separator
         writeShort(0); // image position x,y = 0,0
-        writeShort(0);
+        writeShort(0); // TODO Add offset here - we have it so why not do it?
         writeShort(bitmap.getWidth()); // image size
         writeShort(bitmap.getHeight());
 
-        if (bitmap.getColorTable().equals(image.gct)) {
+        if (bitmap.getColorTable().equals(gct)) {
             out.write(0);
         } else {
-            out.write(0x80 | bitmap.getColorTable().table.length);
+            out.write(0x80 | bitmap.getColorTable().getSize());
         }
     }
 
     /**
-     * Writes color table
+     * Writes color argbTable
      */
     private void writeColorTable(GifColorTable colorTable) throws IOException {
-        byte[] colors = new byte[colorTable.table.length*3];
-        for (int i = 0; i < colorTable.table.length; i += 3) {
-            colors[i + 0] = (byte)colorTable.table[i].getRed();
-            colors[i + 1] = (byte)colorTable.table[i].getGreen();
-            colors[i + 2] = (byte)colorTable.table[i].getBlue();
+        byte[] colors = new byte[colorTable.getSize()*3];
+        for (int i = 0; i < colorTable.getSize(); i++) {
+            colors[i*3 + 0] = (byte)colorTable.getRed(i);
+            colors[i*3 + 1] = (byte)colorTable.getGreen(i);
+            colors[i*3 + 2] = (byte)colorTable.getBlue(i);
         }
 
-        out.write(colors, 0, colorTable.table.length);
-        /** int n = (3 * 256) - colorTable.table.length;
-        for (int i = 0; i < n; i++) {
-            out.write(0);
-         is this nessesary?
-        } */
+        out.write(colors, 0, colors.length);
     }
 
     /**
      * Encodes and writes pixel data
      */
-    private void writeBitmap(Bitmap bitmap) throws IOException {
+    private void writeBitmap(GifBitmap bitmap) throws IOException {
         int[] indexedPixels = bitmap.getColorIndices();
         byte[] byteArray = new byte[indexedPixels.length];
         for (int i = 0; i < byteArray.length; i++) {
@@ -166,7 +168,6 @@ class GifEncoder {
         //
         // TODO interlace if nessesary
         //
-
 
         //
         // LZW compress and write out

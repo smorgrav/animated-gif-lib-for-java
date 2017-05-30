@@ -4,8 +4,8 @@ public class GifEncoderTest {
 
    /* private ByteArrayOutputStream outputStream;
     private GifEncoder encoder;
-    private Bitmap sonic1;
-    private Bitmap sonic2;
+    private GifBitmap sonic1;
+    private GifBitmap sonic2;
 
     @Before
     public void setUp() throws IOException {
@@ -87,7 +87,7 @@ public class GifEncoderTest {
         return expectedBytes;
     }
 
-    private Bitmap getImage(String name) throws IOException {
+    private GifBitmap getImage(String name) throws IOException {
         BufferedImage image =  ImageIO.read(new File(getClass().getResource(name).getFile()));
 
         if (image.getType() != BufferedImage.TYPE_INT_ARGB) {
@@ -97,6 +97,6 @@ public class GifEncoderTest {
         }
 
         int[] outPixels = ((DataBufferInt)image.getRaster().getDataBuffer()).getData();
-        return new Bitmap(image.getWidth(), image.getHeight(), 0,0, outPixels);
+        return new GifBitmap(image.getWidth(), image.getHeight(), 0,0, outPixels);
     }*/
 }

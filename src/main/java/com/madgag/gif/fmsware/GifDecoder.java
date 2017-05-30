@@ -5,24 +5,13 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Class GifDecoder - Decodes a GIF file into one or more frames.
- * <br><pre>
- * Example:
- *    GifDecoder d = new GifDecoder();
- *    d.read("sample.gif");
- *    int n = d.getFrameCount();
- *    for (int i = 0; i < n; i++) {
- *       BufferedImage frame = d.getFrame(i);  // frame i
- *       int t = d.getDelay(i);  // display duration of frame in milliseconds
- *       // do something with frame
- *    }
- * </pre>
- * No copyright asserted on the source code of this class.  May be used for
- * any purpose, however, refer to the Unisys LZW patent for any additional
- * restrictions.  Please forward any corrections to questions at fmsware.com.
+ * Decode an inputstream into a GifImage
  *
+ * @see GifImage
+ *
+ * @author Torbjorn Smorgrav; Rewrite for usage without java.awt and make it more readable.
  * @author Kevin Weiner, FM Software; LZW decoder adapted from John Cristy's ImageMagick.
- * @version 1.03 November 2003
+ * @version 2
  */
 class GifDecoder {
 
@@ -35,14 +24,20 @@ class GifDecoder {
     /**
      * Reads GIF image from stream
      *
-     * @param is BufferedInputStream containing GIF file.
-     * @return read status code (0 = no errors)
+     * @param is BufferedInputStream for the GIF file
+     * @return The internal GifImage data structure.
      */
     public static GifImage decode(InputStream is) {
         GifDecoder decoder = new GifDecoder(new BufferedInputStream(is));
         return decoder.decode();
     }
 
+    /**
+     * Reads GIF image from stream
+     *
+     * @param is InputStream for the GIF file
+     * @return read status code (0 = no errors)
+     */
     private GifDecoder(BufferedInputStream is) {
         this.in = is;
     }
@@ -54,7 +49,7 @@ class GifDecoder {
     }
 
     /**
-     * Read header information including, version, logical screen display and global color table.
+     * Read header information including, version, logical screen display and global color argbTable.
      *
      * Section 17,18 and 19 from https://www.w3.org/Graphics/GIF/spec-gif89a.txt
      */
@@ -84,15 +79,15 @@ class GifDecoder {
         int pixelAspect = read(); //TODO what is this?
 
         //
-        // Global color table (section 19)
+        // Global color argbTable (section 19)
         //
         GifColorTable gct = null;
         if (gctFlag) {
             int[] gctArray = readColorTable(gctSize);
-            gct = new GifColorTable(gctArray, bgIndex);
+            gct = new GifColorTable(gctArray, true);
         }
 
-        return new GifImage(version, width, height, gct);
+        return new GifImage(version, width, height, gct, bgIndex);
     }
 
     /**
@@ -169,7 +164,6 @@ class GifDecoder {
                 }
                 line = iline;
                 iline += inc;
-
 
             if (line < height) {
                 for (int sx = 0; sx < width; sx++) {
@@ -282,7 +276,7 @@ class GifDecoder {
                 }
                 first = ((int) suffix[code]) & 0xff;
 
-                //  Add a new string to the string table,
+                //  Add a new string to the string argbTable,
 
                 if (available >= MAX_STACK_SIZE) {
                     pixelStack[top++] = (byte) first;
@@ -317,7 +311,7 @@ class GifDecoder {
 
 
     /**
-     * Reads color table as 256 RGB integer values
+     * Reads color argbTable as 256 RGB integer values
      *
      * @param ncolors int number of colors to read
      * @return int array containing 256 colors (packed ARGB with full alpha)
@@ -359,7 +353,7 @@ class GifDecoder {
         gce.setTransparent((packed & 1) != 0);
         gce.setUserInputFlag((packed & 2) != 0);
 
-        gce.setDelay(readShort() * 10);
+        gce.setDelay(readShort());
         gce.setTransparcyIndex((byte)read());
 
         read(); // block terminator
@@ -392,8 +386,8 @@ class GifDecoder {
         //
         GifColorTable colorTable = image.gct;
         if (lctFlag) {
-            int[] lct = readColorTable(lctSize); // read table
-            colorTable = new GifColorTable(lct, 0); //TODO background index
+            int[] lct = readColorTable(lctSize); // read argbTable
+            colorTable = new GifColorTable(lct, false);
         }
 
         //
@@ -420,7 +414,7 @@ class GifDecoder {
         //
         // Wrap up
         //
-        Bitmap bitmap = new Bitmap(iw, ih, ix, iy, colorTable, indexedPixels);
+        GifBitmap bitmap = new GifBitmap(iw, ih, ix, iy, colorTable, indexedPixels);
         GifFrame newFrame = new GifFrame(bitmap, gce, interlace);
         image.frames.add(newFrame);
     }

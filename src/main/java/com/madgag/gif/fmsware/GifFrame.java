@@ -5,37 +5,29 @@ package com.madgag.gif.fmsware;
  */
 class GifFrame {
 
-    private final Bitmap bitmap;
+    private final GifBitmap bitmap;
     private final GifGraphicControlExt gce;
     private final boolean interlace;
 
-    GifFrame(Bitmap bitmap, GifGraphicControlExt gce, boolean interlace) {
-        this.bitmap = bitmap;
+    GifFrame(GifBitmap raster, GifGraphicControlExt gce, boolean interlace) {
+        this.bitmap = raster;
         this.gce = gce;
         this.interlace = interlace;
     }
 
-    void draw(Bitmap source) {
-        bitmap.draw(source);
-    }
-
-    boolean isTransparent(int colorIndex) {
-        return (gce.hasTransparency() && gce.getTransparcyIndex() == colorIndex);
-    }
-
-    boolean isInterlaced() {
-        return interlace;
-    }
-
-    GifGraphicControlExt.DisposeMethod getDisposeMethod() {
+    GifGraphicControlExt.DisposeMethod getDispose() {
         return gce.getDispose();
     }
 
-    Bitmap getBitmap()  {
+    GifBitmap getBitmap()  {
         return bitmap;
     }
 
     GifGraphicControlExt getGraphicControlExt() {
         return gce;
+    }
+
+    boolean hasGraphicControlExt() {
+        return !gce.equals(GifGraphicControlExt.DEFAULT);
     }
 }
