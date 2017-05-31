@@ -44,7 +44,7 @@ public class GifColorTable {
      * Used to make indexed bitmaps of argb bitmaps (where we need to map
      * colors into a finite color table.
      */
-    private int findClosest(int color) {
+    int findClosestIndex(int color) {
         int r = (color  >> 16) & 0xff;
         int g = (color  >> 8) & 0xff;
         int b = (color  >> 0) & 0xff;

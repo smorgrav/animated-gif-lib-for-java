@@ -31,21 +31,21 @@ class GifEncoder {
     }
 
     private void encode(GifImage image) throws IOException {
-        writeString(image.version);
+        writeString(image.getVersion());
         writeLogicalScreenDescription(image);
 
         // Global color tabel is optional
-        if (image.gct != null) {
-            writeColorTable(image.gct);
+        if (image.getGlobalColorTable() != null) {
+            writeColorTable(image.getGlobalColorTable());
         }
 
         // Standard GIF spec is to run through the images once
-        if (image.loopCount != 1) {
+        if (image.getLoopCount() != 1) {
             writeNetscapeExt(image);
         }
 
 
-        for (GifFrame frame : image.frames) {
+        for (GifFrame frame : image.getFrames()) {
             encode(frame);
         }
     }
@@ -69,7 +69,7 @@ class GifEncoder {
      * Writes Graphic Control Extension
      */
     private void writeGraphicCtrlExt(GifGraphicControlExt gce) throws IOException {
-        out.write(0x21); // extension introducer
+        out.write(0x21); // extension code
         out.write(0xf9); // GCE label
         out.write(4); // data block size
 
@@ -89,17 +89,17 @@ class GifEncoder {
      */
     private void writeLogicalScreenDescription(GifImage image) throws IOException {
         // logical screen size
-        writeShort(image.width);
-        writeShort(image.height);
+        writeShort(image.getWidth());
+        writeShort(image.getHeight());
 
         // packed fields see description
         int gctSize = 0;
         int gctEnabled = 0;
         int colorDepth = 0x70; //7 bits
         int colorTableSorted = 0;
-        if (image.gct != null) {
+        if (image.getGlobalColorTable() != null) {
             gctEnabled = 0x80;
-            gctSize = (31 - Integer.numberOfLeadingZeros(image.gct.getSize())) - 1;
+            gctSize = (31 - Integer.numberOfLeadingZeros(image.getGlobalColorTable().getSize())) - 1;
         }
 
         int packed = gctEnabled | colorDepth | colorTableSorted | gctSize;
@@ -120,7 +120,7 @@ class GifEncoder {
         writeString("NETSCAPE2.0"); // app id + auth code
         out.write(3); // sub-block size
         out.write(1); // loop sub-block id
-        writeShort(image.loopCount); // loop count (extra iterations, 0=repeat forever)
+        writeShort(image.getLoopCount()); // loop count (extra iterations, 0=repeat forever)
         out.write(0); // block terminator
     }
 

@@ -9,21 +9,26 @@ import java.util.List;
  * This should hold enough information to encode the gif image and
  * methods to create or modify gif images.
  *
+ * TODO create a builder to set different options when creating a GIF
+ *
  * @author smorgrav
  */
 class GifImage {
 
     private static int SAMPLE_INTERVAL = 10;
 
-    final String version;
-    final int width;
-    final int height;
-    final GifColorTable gct;
+    /** Header info */
+    private final String version;
+    private final int width;
+    private final int height;
+    private final GifColorTable gct;
     private final int backGroundIndex;
 
-    // Mutable data
-    int loopCount = 1;
-    final List<GifFrame> frames = new ArrayList<>();
+    /** Netscape 2.0 extension */
+    private int loopCount = 1;
+
+    /** The frames - images and subimages */
+    private final List<GifFrame> frames = new ArrayList<>();
 
     GifImage(String version, int width, int height, GifColorTable globalColorTable, int backGroundIndex) {
         this.version = version;
@@ -33,13 +38,32 @@ class GifImage {
         this.backGroundIndex = backGroundIndex;
     }
 
-    GifImage(int[] argb, int width, int height, int loopCount, int delay) {
-        this.version = "GIF89a";
-        this.width = width;
-        this.height = height;
-        this.gct = null; // Create or leave it byt default?
-        this.backGroundIndex = -1;
-        //Add first frame
+    GifColorTable getGlobalColorTable() {
+        return gct;
+    }
+
+    String getVersion() {
+        return version;
+    }
+
+    List<GifFrame> getFrames() {
+        return frames;
+    }
+
+    int getLoopCount() {
+        return loopCount;
+    }
+
+    void setLoopCount(int loopCount) {
+        this.loopCount = loopCount;
+    }
+
+    int getHeight() {
+        return height;
+    }
+
+    int getWidth() {
+        return width;
     }
 
     /**
@@ -78,12 +102,19 @@ class GifImage {
         return argb;
     }
 
-    void addFrame(int[] argb, int width, int height) {
-        // What about extensions etc? transparency, background color, delay, etc
+    void addFrame(int[] argb, int width, int height, GifGraphicControlExt gce, boolean interlace) {
+
         GifColorTable colorTable = createColorTable(argb);
 
         int[] indexedPixels = new int[argb.length];
-        // Find neareset pixel
+        for (int i = 0; i < argb.length; i++) {
+            indexedPixels[i] = colorTable.findClosestIndex(argb[i]);
+        }
+
+        GifBitmap bitmap = new GifBitmap(width, height, 0, 0, colorTable, indexedPixels);
+
+        GifFrame frame = new GifFrame(bitmap, gce, interlace);
+        frames.add(frame);
     }
 
     void addFrame(GifFrame frame) {
@@ -103,15 +134,18 @@ class GifImage {
         }
 
         NeuQuant nq = new NeuQuant(rgbPixels, rgbPixels.length, SAMPLE_INTERVAL);
-        byte[] colorTab = nq.process();
+        byte[] colorTab = nq.process(); //This is bgr values?
 
-        int[] colorTable = new int[colorTab.length/3];
-        for (int i = 0; i < pixels.length; i++) {
-            colorTable[i] = (byte) ((colorTab[i*3 + 1] << 16) & 0xff);
-            rgbPixels[i] = (byte) ((colorTab[i*3] >> 8) & 0xff);
-            rgbPixels[i] = (byte) ((colorTab[i*3] >> 0) & 0xff);
+        int[] result = new int[colorTab.length/3];
+        for (int i = 0; i < result.length; i++) {
+            int a = 0xff000000;
+            int r = (colorTab[i*3 + 2] << 16);
+            int g = (colorTab[i*3 + 1] << 8);
+            int b = (colorTab[i*3 + 0] << 0);
+            result[i] = a | r| g| b;
         }
 
-        return new GifColorTable(colorTable, false);
+        return new GifColorTable(result, false);
     }
+
 }

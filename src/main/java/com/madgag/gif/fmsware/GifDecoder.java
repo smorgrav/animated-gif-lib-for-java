@@ -71,12 +71,11 @@ class GifDecoder {
         int width = readShort();
         int height = readShort();
 
-        // packed fields
         int packed = read();
         boolean gctFlag = (packed & 0x80) != 0;
         int gctSize = 2 << (packed & 7);    // 6-8 : gct size
         int bgIndex = read(); // background color index
-        int pixelAspect = read(); //TODO what is this?
+        int pixelAspect = read();
 
         //
         // Global color argbTable (section 19)
@@ -116,7 +115,7 @@ class GifDecoder {
                                 app += (char) block[i];
                             }
                             if (app.equals("NETSCAPE2.0")) {
-                                image.loopCount = readNetscapeExt();
+                                image.setLoopCount(readNetscapeExt());
                             } else
                                 skip(); // not supported
                             break;
@@ -384,7 +383,7 @@ class GifDecoder {
         //
         // Read colortable if flag is set
         //
-        GifColorTable colorTable = image.gct;
+        GifColorTable colorTable = image.getGlobalColorTable();
         if (lctFlag) {
             int[] lct = readColorTable(lctSize); // read argbTable
             colorTable = new GifColorTable(lct, false);
@@ -416,7 +415,7 @@ class GifDecoder {
         //
         GifBitmap bitmap = new GifBitmap(iw, ih, ix, iy, colorTable, indexedPixels);
         GifFrame newFrame = new GifFrame(bitmap, gce, interlace);
-        image.frames.add(newFrame);
+        image.addFrame(newFrame);
     }
 
     /**

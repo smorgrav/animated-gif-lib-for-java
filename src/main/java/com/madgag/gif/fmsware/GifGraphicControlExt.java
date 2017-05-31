@@ -7,14 +7,13 @@ import static com.madgag.gif.fmsware.GifGraphicControlExt.DisposeMethod.RESTORE_
  */
 class GifGraphicControlExt {
 
+    static GifGraphicControlExt DEFAULT = new GifGraphicControlExt();
+
     private DisposeMethod dispose = DisposeMethod.DO_NOT_DISPOSE;
     private boolean userInputFlag = false;
     private boolean isTransparent = false;
     private int transparcyIndex = 0;
     private int delay = 0;
-
-
-    static GifGraphicControlExt DEFAULT = new GifGraphicControlExt();
 
     enum DisposeMethod {
         NON_SPECIFIED,
@@ -36,6 +35,10 @@ class GifGraphicControlExt {
             default:
                 throw new GifFormatException("Unknown dispose method specified: " + dispose);
         }
+    }
+
+    void setDispose(DisposeMethod dispose) {
+        this.dispose = dispose;
     }
 
     void setDisposeFromValue(int value) {
@@ -71,6 +74,10 @@ class GifGraphicControlExt {
 
     void setUserInputFlag(boolean userInputFlag) {
         this.userInputFlag = userInputFlag;
+    }
+
+    boolean getUserInputFlag() {
+        return this.userInputFlag;
     }
 
     int getTransparcyIndex() {
