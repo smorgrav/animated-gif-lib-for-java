@@ -42,8 +42,17 @@ public class GifferTest {
     }
 
     @Test
-    public void encode_decode_roundtrip_brucelee() throws IOException {
-        byte[] originalfile = getByteArray(getClass().getResourceAsStream("/sonic-blue-transparent.gif"));
+    public void encode_decode_roundtrips() throws IOException {
+        roundtrip("/sonic-blue-transparent.gif");
+        roundtrip("/sonic-big-and-red.gif");
+        roundtrip("/sonic-green-bg-blue-transparent.gif");
+        roundtrip("/sonic-normal.gif");
+        // TODO check if writing this out roundtrip("/brucelee.gif");
+        // TODO check if writing this out roundtrip("/brucelee-frame.gif");
+    }
+
+    private void roundtrip(String filename) throws IOException {
+        byte[] originalfile = getByteArray(getClass().getResourceAsStream(filename));
         GifImage image = GifDecoder.decode(new ByteArrayInputStream(originalfile));
         ByteArrayOutputStream baos = new ByteArrayOutputStream(10000);
 
@@ -60,7 +69,7 @@ public class GifferTest {
         Assert.assertArrayEquals(originalfile, firstTripDround);
     }
 
-/*    @Test
+    @Test
     public void testBasicOutput() throws Exception {
         buildStandardOptions(Giffer.create());
         assertEncodedImageIsEqualTo("/sonic-normal.gif");
@@ -103,13 +112,15 @@ public class GifferTest {
         assertEncodedImageIsEqualTo("/sonic-green-bg-blue-transparent.gif");
     }
 
-    private GifImage buildStandardOptions(Giffer giffer) {
-        giffer.withLoopCount(0);
-        giffer.withDelay(40);
-        giffer.addFrame(sonic1);
-        giffer.addFrame(sonic2);
-        giffer.build();
-    }*/
+    private GifImage buildStandardOptions(Giffer giffer) throws IOException {
+
+        GifBitmap sonic1 = getImage("/sonic1.png");
+        giffer.withLoopCount(0)
+                .addFrame(sonic1.renderTo();)
+                .withDelay(40)
+                .addFrame(sonic2)
+                .build();
+    }
 
     private GifBitmap getImage(String name) throws IOException {
         BufferedImage image =  ImageIO.read(new File(getClass().getResource(name).getFile()));

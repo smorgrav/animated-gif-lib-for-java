@@ -14,6 +14,8 @@ import java.io.OutputStream;
  */
 class GifEncoder {
 
+    private static int COLOR_DEPTH = 8;
+
     private OutputStream out;
 
     static void encode(GifImage image, OutputStream out) throws IOException {
@@ -48,6 +50,9 @@ class GifEncoder {
         for (GifFrame frame : image.getFrames()) {
             encode(frame);
         }
+
+        // GIF Terminator
+        out.write(0x3B);
     }
 
     void encode(GifFrame frame) throws IOException {
@@ -55,7 +60,7 @@ class GifEncoder {
             writeGraphicCtrlExt(frame.getGraphicControlExt());
         }
 
-        writeImageDesc(frame.getBitmap(), frame.getGraphicControlExt());
+        writeImageDesc(frame.getBitmap());
 
         // Write colortable only if it is local (not global)
         if (!frame.getBitmap().getColorTable().isGlobal()) {
@@ -127,17 +132,20 @@ class GifEncoder {
     /**
      * Writes Image Descriptor
      */
-    private void writeImageDesc(GifBitmap bitmap, GifGraphicControlExt gct) throws IOException {
+    private void writeImageDesc(GifBitmap bitmap) throws IOException {
         out.write(0x2c); // image separator
         writeShort(0); // image position x,y = 0,0
         writeShort(0); // TODO Add offset here - we have it so why not do it?
         writeShort(bitmap.getWidth()); // image size
         writeShort(bitmap.getHeight());
 
-        if (bitmap.getColorTable().equals(gct)) {
+        int sortFlag = 0; // TODO
+        int interlaceFlag = 0;
+        if (bitmap.getColorTable().isGlobal()) {
             out.write(0);
         } else {
-            out.write(0x80 | bitmap.getColorTable().getSize());
+            int lctSize = (31 - Integer.numberOfLeadingZeros(bitmap.getColorTable().getSize())) - 1;
+            out.write(0x80 | lctSize);
         }
     }
 
@@ -173,7 +181,7 @@ class GifEncoder {
         // LZW compress and write out
         //
         LZWEncoder encoder =
-                new LZWEncoder(bitmap.getWidth(), bitmap.getHeight(), byteArray, 7);
+                new LZWEncoder(bitmap.getWidth(), bitmap.getHeight(), byteArray, COLOR_DEPTH);
         encoder.encode(out);
     }
 
