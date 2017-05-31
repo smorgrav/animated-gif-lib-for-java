@@ -15,8 +15,6 @@ import java.util.List;
  */
 class GifImage {
 
-    private static int SAMPLE_INTERVAL = 10;
-
     /** Header info */
     private final String version;
     private final int width;
@@ -104,7 +102,7 @@ class GifImage {
 
     void addFrame(int[] argb, int width, int height, GifGraphicControlExt gce, boolean interlace) {
 
-        GifColorTable colorTable = createColorTable(argb);
+        GifColorTable colorTable = frames.size() == 0 ? getGlobalColorTable() : GifColorTable.create(argb);
 
         int[] indexedPixels = new int[argb.length];
         for (int i = 0; i < argb.length; i++) {
@@ -120,32 +118,4 @@ class GifImage {
     void addFrame(GifFrame frame) {
         frames.add(frame);
     }
-
-    /**
-     * Analyzes pixels and create color map.
-     */
-    private GifColorTable createColorTable(int[] pixels) {
-
-        byte[] rgbPixels = new byte[pixels.length*3];
-        for (int i = 0; i < pixels.length; i++) {
-            rgbPixels[i*3 + 0] = (byte) ((pixels[i] >> 16) & 0xff);
-            rgbPixels[i*3 + 1] = (byte) ((pixels[i] >> 8) & 0xff);
-            rgbPixels[i*3 + 2] = (byte) ((pixels[i] >> 0) & 0xff);
-        }
-
-        NeuQuant nq = new NeuQuant(rgbPixels, rgbPixels.length, SAMPLE_INTERVAL);
-        byte[] colorTab = nq.process(); //This is bgr values?
-
-        int[] result = new int[colorTab.length/3];
-        for (int i = 0; i < result.length; i++) {
-            int a = 0xff000000;
-            int r = (colorTab[i*3 + 2] << 16);
-            int g = (colorTab[i*3 + 1] << 8);
-            int b = (colorTab[i*3 + 0] << 0);
-            result[i] = a | r| g| b;
-        }
-
-        return new GifColorTable(result, false);
-    }
-
 }

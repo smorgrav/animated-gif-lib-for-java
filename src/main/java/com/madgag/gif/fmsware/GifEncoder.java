@@ -18,14 +18,16 @@ class GifEncoder {
 
     private OutputStream out;
 
-    static void encode(GifImage image, OutputStream out) throws IOException {
+    static OutputStream encode(GifImage image, OutputStream out) throws IOException {
         GifEncoder encoder = new GifEncoder(out);
         encoder.encode(image);
+        return out;
     }
 
-    static void encode(GifFrame frame, OutputStream out) throws IOException {
+    static OutputStream encode(GifFrame frame, OutputStream out) throws IOException {
         GifEncoder encoder = new GifEncoder(out);
         encoder.encode(frame);
+        return out;
     }
 
     private GifEncoder(OutputStream out) {

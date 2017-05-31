@@ -1,14 +1,18 @@
 package com.madgag.gif.fmsware;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 /**
- * Builder class for GifImage.
+ * Gif workflow builder
  *
- * This is a convenience class useful when composing a GIF animation -
- * where each frame typically share the same delay.
+ * This is the public interface to the Gif library. Should be
+ * simple to use and hassle free.
  *
- * TODO add support for global color table, userinput, and interlace
+ * TODO add support for user input, and interlace
  * TODO add support for text extension
- * TODO set transparent color and background - color not index - how to?
+ * TODO make methods indicate if for image or for frame, next or previous
  *
  * @author smorgrav
  */
@@ -20,6 +24,8 @@ public class Giffer {
     private int height = -1;
     private GifColorTable gct;
     private int backgroundIndex = -1;
+    private int backgroundColor = -1;
+    private int transparencyColor = -1;
     private GifGraphicControlExt currentGCE = GifGraphicControlExt.DEFAULT;
     private GifImage image;
     private int loopCount = 1;
@@ -45,21 +51,33 @@ public class Giffer {
             this.height = height;
         }
         if (image == null) {
+            // Create global color table (for first image and text etc)
+            gct = GifColorTable.create(argb);
+
+            // Find background index
+            if (backgroundColor > -1) {
+                backgroundIndex = gct.findClosestIndex(backgroundColor);
+            }
+
             build();
         }
+
+        GifColorTable colorTable = GifColorTable.create(argb);
+        if (transparencyColor > -1) {
+            currentGCE.setTransparcyIndex(colorTable.findClosestIndex(transparencyColor));
+        }
+
+        //TODO add colortable in here
         image.addFrame(argb, width, height, currentGCE, interlace);
         return this;
     }
 
     Giffer addFrame(int argb[]) {
-        if (image == null) {
-            build();
-        }
-        image.addFrame(argb, width, height, currentGCE, interlace);
+        addFrame(argb, width, height);
         return this;
     }
 
-    Giffer setWidth(int width) {
+    Giffer withWidth(int width) {
         if (this.width != -1) {
             throw new RuntimeException("You cannot change width - this needs to be fixed");
         }
@@ -67,7 +85,7 @@ public class Giffer {
         return this;
     }
 
-    Giffer setHeight(int height) {
+    Giffer withHeight(int height) {
         if (this.height != -1) {
             throw new RuntimeException("You cannot change height - this needs to be fixed");
         }
@@ -75,8 +93,8 @@ public class Giffer {
         return this;
     }
 
-    Giffer setBackgroundIndex(int index) {
-        this.backgroundIndex = index;
+    Giffer withBackground(int argb) {
+        this.backgroundColor = argb;
         return this;
     }
 
@@ -98,19 +116,41 @@ public class Giffer {
         return this;
     }
 
-    Giffer setUserInput(boolean userInput) {
+    Giffer withUserInput(boolean userInput) {
         currentGCE.setUserInputFlag(userInput);
         return this;
     }
 
-    Giffer setTransparencyIndex(int index) {
-        currentGCE.setTransparcyIndex(index);
-        currentGCE.setTransparent(index >= 0);
+    Giffer withTransparency(int argb) {
+        int transparencyIndex = gct.findClosestIndex(argb);
+        currentGCE.setTransparcyIndex(transparencyIndex);
+        currentGCE.setTransparent(transparencyIndex >= 0);
         return this;
     }
 
     Giffer withDisposeMethod(GifGraphicControlExt.DisposeMethod dispose) {
         currentGCE.setDispose(dispose);
         return this;
+    }
+
+    Giffer encodeTo(OutputStream stream) {
+        if (image == null) {
+            build();
+        }
+        try {
+            GifEncoder.encode(image, stream);
+        } catch (IOException e) {
+            throw new GifferException();
+        }
+        return this;
+    }
+
+    Giffer decodeFrom(InputStream stream) {
+        image = GifDecoder.decode(stream);
+        return this;
+    }
+
+    int[] getARGBInts() {
+        return image.getARGBValues(image.getFrames().size() - 1);
     }
 }
