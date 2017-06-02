@@ -9,7 +9,7 @@ class GifGraphicControlExt {
 
     static GifGraphicControlExt DEFAULT = new GifGraphicControlExt();
 
-    private DisposeMethod dispose = DisposeMethod.DO_NOT_DISPOSE;
+    private DisposeMethod dispose = DisposeMethod.NON_SPECIFIED;
     private boolean userInputFlag = false;
     private boolean isTransparent = false;
     private int transparcyIndex = 0;

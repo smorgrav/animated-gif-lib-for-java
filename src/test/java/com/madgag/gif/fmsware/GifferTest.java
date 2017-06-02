@@ -36,14 +36,29 @@ public class GifferTest {
     }
 
     @Test
-    public void encode_decode_roundtrips() throws IOException {
-        roundtrip("/sonic-blue-transparent.gif");
-        roundtrip("/sonic-big-and-red.gif");
-        roundtrip("/sonic-green-bg-blue-transparent.gif");
+    public void encode_decode_normal() throws IOException {
         roundtrip("/sonic-normal.gif");
+    }
+
+    @Test
+    public void encode_decode_blue_transparant() throws IOException {
+        roundtrip("/sonic-blue-transparent.gif");
+    }
+
+    @Test
+    public void encode_decode_big_and_red() throws IOException {
+        roundtrip("/sonic-big-and-red.gif");
+    }
+
+    @Test
+    public void encode_decode_blue_transparent() throws IOException {
+        roundtrip("/sonic-green-bg-blue-transparent.gif");
+    }
+
         // TODO check if writing this out roundtrip("/brucelee.gif");
         // TODO check if writing this out roundtrip("/brucelee-frame.gif");
-    }
+
+
 
     @Test
     public void create_single_gif_image_from_singlecolor_argb_values() {
@@ -67,7 +82,7 @@ public class GifferTest {
     public void testBasicOutput() throws Exception {
         Giffer.create()
                 .withLoopCount(0)
-                .withDelay(40)
+                .withFrameDelay(40)
                 .addFrame(sonic1, 290, 360)
                 .addFrame(sonic2)
                 .encodeTo(baos);
@@ -79,7 +94,7 @@ public class GifferTest {
     public void testBackgroundColorWorksOnOversizeImage() throws Exception {
         Giffer.create()
                 .withLoopCount(0)
-                .withDelay(40)
+                .withFrameDelay(40)
                 .withWidth(600)
                 .withHeight(600)
                 .withBackground(RED)
@@ -94,9 +109,9 @@ public class GifferTest {
     public void testTransparentColor() throws Exception {
         Giffer.create()
                 .withLoopCount(0)
-                .withDelay(40)
+                .withFrameDelay(40)
                 .addFrame(sonic1, 290, 360)
-                .withTransparency(BLUE)
+                .withFrameTransparency(BLUE)
                 .addFrame(sonic2, 290, 360)
                 .encodeTo(baos);
 
@@ -107,11 +122,11 @@ public class GifferTest {
     public void testBackgroundAndTransparent() throws Exception {
         Giffer.create()
                 .withLoopCount(0)
-                .withDelay(40)
+                .withFrameDelay(40)
                 .withHeight(600)
                 .withWidth(600)
                 .withBackground(GREEN)
-                .withTransparency(BLUE)
+                .withFrameTransparency(BLUE)
                 .addFrame(sonic1, 290, 360)
                 .addFrame(sonic2, 290, 360)
                 .encodeTo(baos);
@@ -155,13 +170,15 @@ public class GifferTest {
     private void compare(String expectedFile, byte[] actualArray) throws IOException {
         byte[] expectedArray = getByteArray(getClass().getResourceAsStream(expectedFile));
 
+        int differences = 0;
         for (int i = 0; i < actualArray.length; i++) {
             if (expectedArray[i] != actualArray[i]) {
                 System.out.println("Difference at index: " + i + " expected " + expectedArray[i] + " but got " + actualArray[i]);
-                break;
+                differences++;
             }
         }
 
+        System.out.println("Got nof differences: " + differences);
         Assert.assertArrayEquals(expectedArray, actualArray);
     }
 }

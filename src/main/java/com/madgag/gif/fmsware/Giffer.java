@@ -7,8 +7,8 @@ import java.io.OutputStream;
 /**
  * Gif workflow builder
  *
- * This is the public interface to the Gif library. Should be
- * simple to use and hassle free.
+ * This is the public interface to the library. Should be
+ * simple and hassle free to use.
  *
  * TODO add support for user input, and interlace
  * TODO add support for text extension
@@ -26,7 +26,7 @@ public class Giffer {
     private int backgroundIndex = -1;
     private int backgroundColor = -1;
     private int transparencyColor = -1;
-    private GifGraphicControlExt currentGCE = GifGraphicControlExt.DEFAULT;
+    private GifGraphicControlExt currentGCE = new GifGraphicControlExt();
     private GifImage image;
     private int loopCount = 1;
     private boolean interlace = false;
@@ -53,11 +53,18 @@ public class Giffer {
         if (image == null) {
             // Create global color table (for first image and text etc)
             gct = GifColorTable.create(argb);
+            GifBitmap tempMap = new GifBitmap(this.width, this.height, 0, 0, gct, argb);
+            int[] finalFirst = new int[this.width* this.height];
+            tempMap.renderWithColorTo(finalFirst,width,backgroundColor);
+            gct = GifColorTable.create(finalFirst);
 
             // Find background index
             if (backgroundColor > -1) {
                 backgroundIndex = gct.findClosestIndex(backgroundColor);
             }
+
+            // TODO gct can only be made after adding first frame ... reflect that for GifImage
+            // TODO also add extensions
 
             build();
         }
@@ -67,7 +74,6 @@ public class Giffer {
             currentGCE.setTransparcyIndex(colorTable.findClosestIndex(transparencyColor));
         }
 
-        //TODO add colortable in here
         image.addFrame(argb, width, height, currentGCE, interlace);
         return this;
     }
@@ -98,7 +104,7 @@ public class Giffer {
         return this;
     }
 
-    Giffer withInterlace(boolean interlace) {
+    Giffer withFrameInterlace(boolean interlace) {
         this.interlace = interlace;
         return this;
     }
@@ -111,24 +117,22 @@ public class Giffer {
         return this;
     }
 
-    Giffer withDelay(int delay) {
+    Giffer withFrameDelay(int delay) {
         currentGCE.setDelay(delay);
         return this;
     }
 
-    Giffer withUserInput(boolean userInput) {
+    Giffer withFrameUserInput(boolean userInput) {
         currentGCE.setUserInputFlag(userInput);
         return this;
     }
 
-    Giffer withTransparency(int argb) {
-        int transparencyIndex = gct.findClosestIndex(argb);
-        currentGCE.setTransparcyIndex(transparencyIndex);
-        currentGCE.setTransparent(transparencyIndex >= 0);
+    Giffer withFrameTransparency(int argb) {
+        transparencyColor = argb;
         return this;
     }
 
-    Giffer withDisposeMethod(GifGraphicControlExt.DisposeMethod dispose) {
+    Giffer withFrameDispose(GifGraphicControlExt.DisposeMethod dispose) {
         currentGCE.setDispose(dispose);
         return this;
     }

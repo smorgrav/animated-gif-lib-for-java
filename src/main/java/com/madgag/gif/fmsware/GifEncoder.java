@@ -48,7 +48,6 @@ class GifEncoder {
             writeNetscapeExt(image);
         }
 
-
         for (GifFrame frame : image.getFrames()) {
             encode(frame);
         }

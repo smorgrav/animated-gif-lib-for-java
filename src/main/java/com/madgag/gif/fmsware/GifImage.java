@@ -28,6 +28,7 @@ class GifImage {
     /** The frames - images and subimages */
     private final List<GifFrame> frames = new ArrayList<>();
 
+
     GifImage(String version, int width, int height, GifColorTable globalColorTable, int backGroundIndex) {
         this.version = version;
         this.width = width;

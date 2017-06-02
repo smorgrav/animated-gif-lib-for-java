@@ -87,10 +87,10 @@ public class GifColorTable {
         int[] result = new int[colorTab.length/3];
         for (int i = 0; i < result.length; i++) {
             int a = 0xff000000;
-            int r = (colorTab[i*3 + 2] << 16);
-            int g = (colorTab[i*3 + 1] << 8);
-            int b = (colorTab[i*3 + 0] << 0);
-            result[i] = a | r| g| b;
+            int r = colorTab[i*3 + 2] << 16 & 0xff0000;
+            int g = colorTab[i*3 + 1] << 8 & 0xff00;
+            int b = colorTab[i*3 + 0] & 0xff;
+            result[i] = a | r | g | b;
         }
 
         return new GifColorTable(result, false);
