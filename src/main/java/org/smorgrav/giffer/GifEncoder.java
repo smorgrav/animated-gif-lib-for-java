@@ -1,4 +1,4 @@
-package com.madgag.gif.fmsware;
+package org.smorgrav.giffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -83,12 +83,12 @@ class GifEncoder {
 
         int dispose = gce.getDisposeValue();
         dispose <<= 2;
-        int tranparency = gce.hasTransparency() ? 1 : 0;
-        int packed = dispose | tranparency;
+        int transparency = gce.hasTransparency() ? 1 : 0;
+        int packed = dispose | transparency;
         out.write(packed);
 
         writeShort(gce.getDelay());
-        out.write(gce.getTransparcyIndex()); // transparent color index
+        out.write(gce.getTransparcyIndex() * transparency); // transparent color index - 0 if no transparency
         out.write(0); // block terminator
     }
 

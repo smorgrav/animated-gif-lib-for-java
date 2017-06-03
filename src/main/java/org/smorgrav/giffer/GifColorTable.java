@@ -1,9 +1,9 @@
-package com.madgag.gif.fmsware;
+package org.smorgrav.giffer;
 
 /**
- * A color table of integers composed of a,r,g,b components
- * + each of 8 bits. Methods to get the components and to
- * find colors etc.
+ * A color table of integers composed of a,r,g,b components each of 8 bits.
+ *
+ * Methods to operate on the color table.
  *
  * @author smorgrav
  */

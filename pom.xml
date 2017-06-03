@@ -1,22 +1,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>7</version>
-    </parent>
-    <groupId>com.madgag</groupId>
-    <artifactId>animated-gif-lib</artifactId>
+    <groupId>org.smorgrav</groupId>
+    <artifactId>giffer</artifactId>
     <version>1.3-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <name>Animated GIF library for Java</name>
+    <name>Giffer</name>
     <description>
-        A re-package of the Animated GIF processing classes made
-        available by Kevin Weiner at http://www.fmsware.com/stuff/gif.html
+        This is a library to encode, decode and create gif images and animations.
+        It is without dependencies to java.awt or any third party libraries making it
+        suitable for e.g. google appengine.
     </description>
-    <url>https://github.com/rtyley/animated-gif-lib-for-java</url>
+    <url>https://github.com/smorgrav/giffer</url>
     <issueManagement>
-        <url>https://github.com/rtyley/animated-gif-lib-for-java/issues</url>
+        <url>https://github.com/smorgrav/giffer/issues</url>
         <system>GitHub Issues</system>
     </issueManagement>
     <licenses>
@@ -27,16 +23,16 @@
         </license>
     </licenses>
     <scm>
-        <url>https://github.com/rtyley/animated-gif-lib-for-java</url>
-        <connection>scm:git:git://github.com/rtyley/animated-gif-lib-for-java.git</connection>
-        <developerConnection>scm:git:git@github.com:rtyley/animated-gif-lib-for-java.git</developerConnection>
+        <url>https://github.com/smorgrav/giffer</url>
+        <connection>scm:git:git://github.com/smorgrav/giffer.git</connection>
+        <developerConnection>scm:git:git@github.com:smorgrav/giffer.git</developerConnection>
     </scm>
     <developers>
         <developer>
-            <email>roberto.tyley@gmail.com</email>
-            <name>Roberto Tyley</name>
-            <url>https://github.com/rtyley</url>
-            <id>rtyley</id>
+            <email>smorgrav@gmail.com</email>
+            <name>Toby</name>
+            <url>https://github.com/smorgrav</url>
+            <id>smorgrav</id>
         </developer>
     </developers>
 
@@ -45,12 +41,6 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.8.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.easytesting</groupId>
-            <artifactId>fest-assert-core</artifactId>
-            <version>2.0M10</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

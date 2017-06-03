@@ -1,6 +1,6 @@
-package com.madgag.gif.fmsware;
+package org.smorgrav.giffer;
 
-import static com.madgag.gif.fmsware.GifGraphicControlExt.DisposeMethod.RESTORE_TO_PREVIOUS;
+import static org.smorgrav.giffer.GifGraphicControlExt.DisposeMethod.RESTORE_TO_PREVIOUS;
 
 /**
  * @author smorgrav

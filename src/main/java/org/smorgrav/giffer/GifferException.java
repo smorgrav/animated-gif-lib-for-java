@@ -1,4 +1,4 @@
-package com.madgag.gif.fmsware;
+package org.smorgrav.giffer;
 
 /**
  * @author smorgrav

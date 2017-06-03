@@ -1,4 +1,4 @@
-package com.madgag.gif.fmsware;
+package org.smorgrav.giffer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,13 +99,13 @@ class GifImage {
                         case RESTORE_TO_PREVIOUS:
                             break;
                         case DO_NOT_DISPOSE:
-                            currentFrame.getBitmap().renderTo(argb, width);
+                            currentFrame.getBitmap().renderTo(argb, width, currentFrame.getGraphicControlExt());
                             break;
                         default:
                             throw new GifFormatException("Unknown dispose method: " + currentFrame.getDispose());
                     }
                 } else {
-                    currentFrame.getBitmap().renderTo(argb, width);
+                    currentFrame.getBitmap().renderTo(argb, width, currentFrame.getGraphicControlExt());
                 }
         }
 

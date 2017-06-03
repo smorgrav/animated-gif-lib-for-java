@@ -1,4 +1,4 @@
-package com.madgag.gif.fmsware;
+package org.smorgrav.giffer;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -27,7 +27,7 @@ class GifDecoder {
      * @param is BufferedInputStream for the GIF file
      * @return The internal GifImage data structure.
      */
-    public static GifImage decode(InputStream is) {
+    static GifImage decode(InputStream is) {
         GifDecoder decoder = new GifDecoder(new BufferedInputStream(is));
         return decoder.decode();
     }
@@ -36,7 +36,6 @@ class GifDecoder {
      * Reads GIF image from stream
      *
      * @param is InputStream for the GIF file
-     * @return read status code (0 = no errors)
      */
     private GifDecoder(BufferedInputStream is) {
         this.in = is;

@@ -1,10 +1,8 @@
-package com.madgag.gif.fmsware;
+package org.smorgrav.giffer;
 
 /**
- * Not just a bitmap but a bitmap of indexed colors, the color table the indices refers to
- * and the meta data to position the bitmap onto other bitmaps.
- * <p>
- * Also handle transparency color (which means skip pixel with this color set).
+ * Not just a bitmap but a bitmap of indexed colors, the color table that
+ * the indices refers to and the meta data to position the bitmap onto other bitmaps.
  *
  * @author smorgrav
  */
@@ -16,8 +14,6 @@ class GifBitmap {
     private final int offsetx;
     private final int offsety;
     private final GifColorTable colorTable;
-    private final boolean hasTransparency;
-    private final int transparentColorIndex;
 
     GifBitmap(int width, int height, int offsetx, int offsety, GifColorTable colorTable, int[] colorIndices) {
         this.width = width;
@@ -26,8 +22,6 @@ class GifBitmap {
         this.offsetx = offsetx;
         this.offsety = offsety;
         this.colorTable = colorTable;
-        this.hasTransparency = false;
-        this.transparentColorIndex = 0;
     }
 
     /**
@@ -35,7 +29,7 @@ class GifBitmap {
      * <p>
      * The array layout must be equal or larger than this bitmap
      */
-    void renderTo(int[] argb, int argbWidth) {
+    void renderTo(int[] argb, int argbWidth, GifGraphicControlExt ext) {
         if (argb.length < width * height) {
             throw new IllegalArgumentException("The target argb array is too small: " + argb.length);
         }
@@ -45,7 +39,7 @@ class GifBitmap {
                 int sourceIndex = y * width + x;
                 int targetIndex = (offsety + y) * argbWidth + offsetx + x;
                 // Only set color on target if the current pixel is not transparent
-                if (!hasTransparency || transparentColorIndex != colorIndices[sourceIndex]) {
+                if (!ext.hasTransparency() || ext.getTransparcyIndex() != colorIndices[sourceIndex]) {
                     int colorIndex = colorIndices[sourceIndex];
                     int color = colorTable.getColor(colorIndex);
                     argb[targetIndex] = color;

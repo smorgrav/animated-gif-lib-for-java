@@ -1,4 +1,4 @@
-package com.madgag.gif.fmsware;
+package org.smorgrav.giffer;
 
 import java.io.OutputStream;
 import java.io.IOException;

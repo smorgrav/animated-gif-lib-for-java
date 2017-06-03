@@ -1,4 +1,4 @@
-package com.madgag.gif.fmsware;
+package org.smorgrav.giffer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -12,8 +12,8 @@ import java.io.OutputStream;
  *
  * TODO add support for user input, and interlace
  * TODO add support for text extension
- * TODO make methods indicate if for image or for frame, next or previous
- * TODO also add extensions
+ * TODO make methods indicate if for image or for frame, next or previous - maybe make separate Frame builder?
+ * TODO add generic extension list instead of netscape ext as inlined
  * TODO use optionals when supporting java8
  * TODO background - gce or part of image?
  *
@@ -45,7 +45,7 @@ public class Giffer {
         return image;
     }
 
-    Giffer addFrame(int argb[], int subWidth, int subHeight, int offsetx, int offsety) {
+    public Giffer addFrame(int argb[], int subWidth, int subHeight, int offsetx, int offsety) {
         if (this.width == -1 && offsetx == 0 && this.height == -1 && offsety == 0) {
             this.width = subWidth;
             this.height = subHeight;
@@ -66,7 +66,7 @@ public class Giffer {
                 int[] finalFirst = new int[this.width * this.height];
                 backgroundMap.renderWithColorTo(finalFirst,width,backgroundColor);
                 GifBitmap firstFrameMap = new GifBitmap(subWidth, subHeight, offsetx, offsety, colorTable, colorIndices);
-                firstFrameMap.renderTo(finalFirst, width);
+                firstFrameMap.renderTo(finalFirst, width, currentGCE);
                 gct = GifColorTable.create(finalFirst, true);
                 backgroundIndex = gct.findClosestIndex(backgroundColor);
             } else {
@@ -85,21 +85,12 @@ public class Giffer {
         return this;
     }
 
-    Giffer addFrame(int argb[]) {
+    public Giffer addFrame(int argb[]) {
         addFrame(argb, width, height, 0, 0);
         return this;
     }
 
-    Giffer encodeFrame(OutputStream outputStream) {
-        try {
-            GifEncoder.encode(image.getFrames().get(image.getFrames().size() - 1), outputStream);
-        } catch (IOException ioe) {
-             throw new GifferException("Something with that outputstream: " + ioe);
-        }
-        return this;
-    }
-
-    Giffer withWidth(int width) {
+    public Giffer withWidth(int width) {
         if (this.width != -1) {
             throw new GifferException("You cannot change width - this needs to be fixed");
         }
@@ -107,7 +98,7 @@ public class Giffer {
         return this;
     }
 
-    Giffer withHeight(int height) {
+    public Giffer withHeight(int height) {
         if (this.height != -1) {
             throw new GifferException("You cannot change height - this needs to be fixed");
         }
@@ -115,24 +106,24 @@ public class Giffer {
         return this;
     }
 
-    Giffer withBackground(int argb) {
+    public Giffer withBackground(int argb) {
         this.backgroundColor = argb;
         this.enableBackground = true;
         return this;
     }
 
-    Giffer withFrameInterlace(boolean interlace) {
+    public Giffer withFrameInterlace(boolean interlace) {
         this.interlace = interlace;
         return this;
     }
 
-    Giffer withPixelAspectRation(int ratio) {
+    public Giffer withPixelAspectRation(int ratio) {
         this.aspectRatio = ratio;
 
         return this;
     }
 
-    Giffer withLoopCount(int loopCount) {
+    public Giffer withLoopCount(int loopCount) {
         if (image != null) {
             image.setLoopCount(loopCount);
         }
@@ -140,29 +131,29 @@ public class Giffer {
         return this;
     }
 
-    Giffer withFrameDelay(int delay) {
+    public Giffer withFrameDelay(int delay) {
         currentGCE.setDelay(delay);
         return this;
     }
 
-    Giffer withFrameUserInput(boolean userInput) {
+    public Giffer withFrameUserInput(boolean userInput) {
         currentGCE.setUserInputFlag(userInput);
         return this;
     }
 
     //TODO reset frame stuff... create builder?
-    Giffer withFrameTransparency(int argb) {
+    public Giffer withFrameTransparency(int argb) {
         transparencyColor = argb;
         this.enableTransparency = true;
         return this;
     }
 
-    Giffer withFrameDispose(GifGraphicControlExt.DisposeMethod dispose) {
+    public Giffer withFrameDispose(GifGraphicControlExt.DisposeMethod dispose) {
         currentGCE.setDispose(dispose);
         return this;
     }
 
-    Giffer encodeTo(OutputStream stream, boolean isComplete) {
+    public Giffer encode(OutputStream stream, boolean isComplete) {
         if (image == null) throw new GifferException("No image decoded or created to encode");
         try {
             GifEncoder.encode(image, stream, isComplete);
@@ -172,12 +163,21 @@ public class Giffer {
         return this;
     }
 
-    Giffer decodeFrom(InputStream stream) {
+    public Giffer encodeFrame(OutputStream outputStream) {
+        try {
+            GifEncoder.encode(image.getFrames().get(image.getFrames().size() - 1), outputStream);
+        } catch (IOException ioe) {
+            throw new GifferException("Something with that outputstream: " + ioe);
+        }
+        return this;
+    }
+
+    public Giffer decode(InputStream stream) {
         image = GifDecoder.decode(stream);
         return this;
     }
 
-    int[] getARGBInts() {
+    public int[] getARGBInts() {
         return image.getARGBValues(image.getFrames().size() - 1);
     }
 }

@@ -1,4 +1,4 @@
-package com.madgag.gif.fmsware;
+package org.smorgrav.giffer;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -9,7 +9,6 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -86,14 +85,13 @@ public class GifferTest {
                 .withFrameDelay(40)
                 .addFrame(sonic1, 290, 360, 0, 0)
                 .addFrame(sonic2)
-                .encodeTo(new FileOutputStream("/Users/smorgrav/dev/privat/test-images/test.gif"), true)
                 .build();
 
         GifImage expected = Giffer.create()
-                .decodeFrom(getClass().getResourceAsStream("/sonic-normal.gif"))
+                .decode(getClass().getResourceAsStream("/sonic-normal.gif"))
                 .build();
 
-        Assert.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -106,14 +104,13 @@ public class GifferTest {
                 .withBackground(RED)
                 .addFrame(sonic1, 290, 360, 0, 0)
                 .addFrame(sonic2, 290, 360, 0, 0)
-                .encodeTo(new FileOutputStream("/Users/smorgrav/dev/privat/test-images/test.gif"), true)
                 .build();
 
         GifImage expected = Giffer.create()
-                .decodeFrom(getClass().getResourceAsStream("/sonic-big-and-red.gif"))
+                .decode(getClass().getResourceAsStream("/sonic-big-and-red.gif"))
                 .build();
 
-        Assert.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -124,14 +121,13 @@ public class GifferTest {
                 .addFrame(sonic1, 290, 360, 0, 0)
                 .withFrameTransparency(BLUE)
                 .addFrame(sonic2, 290, 360, 0, 0)
-                .encodeTo(new FileOutputStream("/Users/smorgrav/dev/privat/test-images/test.gif"), true)
                 .build();
 
         GifImage expected = Giffer.create()
-                .decodeFrom(getClass().getResourceAsStream("/sonic-blue-transparent.gif"))
+                .decode(getClass().getResourceAsStream("/sonic-blue-transparent.gif"))
                 .build();
 
-        Assert.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -145,14 +141,13 @@ public class GifferTest {
                 .withFrameTransparency(BLUE)
                 .addFrame(sonic1, 290, 360, 0, 0)
                 .addFrame(sonic2, 290, 360, 0, 0)
-                .encodeTo(new FileOutputStream("/Users/smorgrav/dev/privat/test-images/test.gif"), true)
                 .build();
 
         GifImage expected = Giffer.create()
-                .decodeFrom(getClass().getResourceAsStream("/sonic-green-bg-blue-transparent.gif"))
+                .decode(getClass().getResourceAsStream("/sonic-green-bg-blue-transparent.gif"))
                 .build();
 
-        Assert.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -180,8 +175,8 @@ public class GifferTest {
 
     private void roundtrip(String filename) throws IOException {
         Giffer.create()
-                .decodeFrom(getClass().getResourceAsStream(filename))
-                .encodeTo(baos, true);
+                .decode(getClass().getResourceAsStream(filename))
+                .encode(baos, true);
         compare(filename, baos.toByteArray());
     }
 
@@ -191,7 +186,7 @@ public class GifferTest {
         int differences = 0;
         for (int i = 0; i < actualArray.length; i++) {
             if (expectedArray[i] != actualArray[i]) {
-                System.out.println("Difference at index: " + i + " expected " + expectedArray[i] + " but got " + actualArray[i]);
+                //System.out.println("Difference at index: " + i + " expected " + expectedArray[i] + " but got " + actualArray[i]);
                 differences++;
             }
         }
