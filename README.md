@@ -16,7 +16,7 @@ Usage
 =====
 
 To create an animation from two images:
-`
+```
         int[] image1, image2; //argb arrays
         Giffer.create()
                 .withLoopCount(0)
@@ -25,7 +25,7 @@ To create an animation from two images:
                 .withFrameTransparency(BLUE)
                 .addFrame(image2, 290, 360, 0, 0)
                 .encode(outputstream);
-`
+```
 
 Contribution
 ============
