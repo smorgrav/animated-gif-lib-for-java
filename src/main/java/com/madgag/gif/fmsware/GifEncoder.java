@@ -18,9 +18,9 @@ class GifEncoder {
 
     private OutputStream out;
 
-    static OutputStream encode(GifImage image, OutputStream out) throws IOException {
+    static OutputStream encode(GifImage image, OutputStream out, boolean isComplete) throws IOException {
         GifEncoder encoder = new GifEncoder(out);
-        encoder.encode(image);
+        encoder.encode(image, isComplete);
         return out;
     }
 
@@ -34,7 +34,7 @@ class GifEncoder {
         this.out = out;
     }
 
-    private void encode(GifImage image) throws IOException {
+    private void encode(GifImage image, boolean isComplete) throws IOException {
         writeString(image.getVersion());
         writeLogicalScreenDescription(image);
 
@@ -52,11 +52,13 @@ class GifEncoder {
             encode(frame);
         }
 
-        // GIF Terminator
-        out.write(0x3B);
+        // GIF Terminator - seems like this one is optional
+        if (isComplete) {
+            out.write(0x3B);
+        }
     }
 
-    void encode(GifFrame frame) throws IOException {
+    private void encode(GifFrame frame) throws IOException {
         if (frame.hasGraphicControlExt()) {
             writeGraphicCtrlExt(frame.getGraphicControlExt());
         }

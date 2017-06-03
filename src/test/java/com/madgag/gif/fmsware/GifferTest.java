@@ -23,7 +23,7 @@ import static org.junit.Assert.assertEquals;
  * // TODO check if writing this out roundtrip("/brucelee.gif");
  * // TODO check if writing this out roundtrip("/brucelee-frame.gif");
  *
- * TODO expand equals method to also account for gct and frames equality
+ * TODO expand equals method/testing to also account for gct and frames equality
  */
 public class GifferTest {
 
@@ -86,7 +86,7 @@ public class GifferTest {
                 .withFrameDelay(40)
                 .addFrame(sonic1, 290, 360, 0, 0)
                 .addFrame(sonic2)
-                .encodeTo(new FileOutputStream("/Users/smorgrav/dev/privat/test-images/test.gif"))
+                .encodeTo(new FileOutputStream("/Users/smorgrav/dev/privat/test-images/test.gif"), true)
                 .build();
 
         GifImage expected = Giffer.create()
@@ -106,7 +106,7 @@ public class GifferTest {
                 .withBackground(RED)
                 .addFrame(sonic1, 290, 360, 0, 0)
                 .addFrame(sonic2, 290, 360, 0, 0)
-                .encodeTo(new FileOutputStream("/Users/smorgrav/dev/privat/test-images/test.gif"))
+                .encodeTo(new FileOutputStream("/Users/smorgrav/dev/privat/test-images/test.gif"), true)
                 .build();
 
         GifImage expected = Giffer.create()
@@ -124,7 +124,7 @@ public class GifferTest {
                 .addFrame(sonic1, 290, 360, 0, 0)
                 .withFrameTransparency(BLUE)
                 .addFrame(sonic2, 290, 360, 0, 0)
-                .encodeTo(new FileOutputStream("/Users/smorgrav/dev/privat/test-images/test.gif"))
+                .encodeTo(new FileOutputStream("/Users/smorgrav/dev/privat/test-images/test.gif"), true)
                 .build();
 
         GifImage expected = Giffer.create()
@@ -145,7 +145,7 @@ public class GifferTest {
                 .withFrameTransparency(BLUE)
                 .addFrame(sonic1, 290, 360, 0, 0)
                 .addFrame(sonic2, 290, 360, 0, 0)
-                .encodeTo(new FileOutputStream("/Users/smorgrav/dev/privat/test-images/test.gif"))
+                .encodeTo(new FileOutputStream("/Users/smorgrav/dev/privat/test-images/test.gif"), true)
                 .build();
 
         GifImage expected = Giffer.create()
@@ -153,6 +153,17 @@ public class GifferTest {
                 .build();
 
         Assert.assertEquals(expected, actual);
+    }
+
+    @Test
+    public void render_one_frame_only() {
+        int red = 0xffff0000;
+        int[] argb = new int[]{red, red, red, red, red, red, red, red, red};
+        ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
+        Giffer.create().addFrame(argb, 3, 3, 0, 0).encodeFrame(baos);
+
+        byte[] result = baos.toByteArray();
+        Assert.assertTrue(result.length > 100);
     }
 
     private int[] getImage(String name) throws IOException {
@@ -170,7 +181,7 @@ public class GifferTest {
     private void roundtrip(String filename) throws IOException {
         Giffer.create()
                 .decodeFrom(getClass().getResourceAsStream(filename))
-                .encodeTo(baos);
+                .encodeTo(baos, true);
         compare(filename, baos.toByteArray());
     }
 

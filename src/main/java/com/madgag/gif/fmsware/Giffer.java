@@ -73,12 +73,7 @@ public class Giffer {
                 gct = GifColorTable.create(argb, true);
             }
 
-            // The first frame share colortable with global -
-            // TODO this is not strictly correct and a premature optimization I think
-            // Globale color table should guarantee a background color to be present... that is not the case now
-            colorTable = gct;
-
-            image = new GifImage(DEFAULT_VERSION, width, height, gct, backgroundIndex, aspectRatio);
+            image = new GifImage(DEFAULT_VERSION, width, height, colorTable, backgroundIndex, aspectRatio);
             image.setLoopCount(loopCount);
         }
 
@@ -92,6 +87,15 @@ public class Giffer {
 
     Giffer addFrame(int argb[]) {
         addFrame(argb, width, height, 0, 0);
+        return this;
+    }
+
+    Giffer encodeFrame(OutputStream outputStream) {
+        try {
+            GifEncoder.encode(image.getFrames().get(image.getFrames().size() - 1), outputStream);
+        } catch (IOException ioe) {
+             throw new GifferException("Something with that outputstream: " + ioe);
+        }
         return this;
     }
 
@@ -158,10 +162,10 @@ public class Giffer {
         return this;
     }
 
-    Giffer encodeTo(OutputStream stream) {
+    Giffer encodeTo(OutputStream stream, boolean isComplete) {
         if (image == null) throw new GifferException("No image decoded or created to encode");
         try {
-            GifEncoder.encode(image, stream);
+            GifEncoder.encode(image, stream, isComplete);
         } catch (IOException e) {
             throw new GifferException("Encoding issue: " + e);
         }
