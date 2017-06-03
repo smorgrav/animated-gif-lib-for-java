@@ -86,7 +86,7 @@ class GifDecoder {
             gct = new GifColorTable(gctArray, true);
         }
 
-        return new GifImage(version, width, height, gct, bgIndex);
+        return new GifImage(version, width, height, gct, bgIndex, pixelAspect);
     }
 
     /**

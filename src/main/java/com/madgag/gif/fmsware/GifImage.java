@@ -2,6 +2,7 @@ package com.madgag.gif.fmsware;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * The GIF image complete with metadata and frames.
@@ -21,6 +22,7 @@ class GifImage {
     private final int height;
     private final GifColorTable gct;
     private final int backGroundIndex;
+    private final int aspectRatio;
 
     /** Netscape 2.0 extension */
     private int loopCount = 1;
@@ -29,12 +31,13 @@ class GifImage {
     private final List<GifFrame> frames = new ArrayList<>();
 
 
-    GifImage(String version, int width, int height, GifColorTable globalColorTable, int backGroundIndex) {
+    GifImage(String version, int width, int height, GifColorTable globalColorTable, int backGroundIndex, int aspectRatio) {
         this.version = version;
         this.width = width;
         this.height = height;
         this.gct = globalColorTable;
         this.backGroundIndex = backGroundIndex;
+        this.aspectRatio = aspectRatio;
     }
 
     GifColorTable getGlobalColorTable() {
@@ -63,6 +66,14 @@ class GifImage {
 
     int getWidth() {
         return width;
+    }
+
+    public int getBackGroundIndex() {
+        return backGroundIndex;
+    }
+
+    public int getAspectRatio() {
+        return aspectRatio;
     }
 
     /**
@@ -101,16 +112,14 @@ class GifImage {
         return argb;
     }
 
-    void addFrame(int[] argb, int width, int height, GifGraphicControlExt gce, boolean interlace) {
-
-        GifColorTable colorTable = frames.size() == 0 ? getGlobalColorTable() : GifColorTable.create(argb);
+    void addFrame(int[] argb, int subWidth, int subHeigth, int offsetx, int offsety, GifColorTable colorTable, GifGraphicControlExt gce, boolean interlace) {
 
         int[] indexedPixels = new int[argb.length];
         for (int i = 0; i < argb.length; i++) {
             indexedPixels[i] = colorTable.findClosestIndex(argb[i]);
         }
 
-        GifBitmap bitmap = new GifBitmap(width, height, 0, 0, colorTable, indexedPixels);
+        GifBitmap bitmap = new GifBitmap(subWidth, subHeigth, offsetx, offsety, colorTable, indexedPixels);
 
         GifFrame frame = new GifFrame(bitmap, gce, interlace);
         frames.add(frame);
@@ -118,5 +127,23 @@ class GifImage {
 
     void addFrame(GifFrame frame) {
         frames.add(frame);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        GifImage gifImage = (GifImage) o;
+        return getWidth() == gifImage.getWidth() &&
+                getHeight() == gifImage.getHeight() &&
+                getBackGroundIndex() == gifImage.getBackGroundIndex() &&
+                getAspectRatio() == gifImage.getAspectRatio() &&
+                getLoopCount() == gifImage.getLoopCount() &&
+                Objects.equals(getVersion(), gifImage.getVersion());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getVersion(), getWidth(), getHeight(), getBackGroundIndex(), getAspectRatio(), getLoopCount());
     }
 }

@@ -111,8 +111,8 @@ class GifEncoder {
         int packed = gctEnabled | colorDepth | colorTableSorted | gctSize;
         out.write(packed);
 
-        out.write(0); // background color index
-        out.write(0); // pixel aspect ratio - assume 1:1
+        out.write(image.getBackGroundIndex());
+        out.write(image.getAspectRatio());
     }
 
     /**
@@ -135,7 +135,7 @@ class GifEncoder {
      */
     private void writeImageDesc(GifBitmap bitmap) throws IOException {
         out.write(0x2c); // image separator
-        writeShort(0); // image position x,y = 0,0
+        writeShort(0); // TODO image position x,y = 0,0
         writeShort(0); // TODO Add offset here - we have it so why not do it?
         writeShort(bitmap.getWidth()); // image size
         writeShort(bitmap.getHeight());

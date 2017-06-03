@@ -9,7 +9,7 @@ package com.madgag.gif.fmsware;
  */
 public class GifColorTable {
 
-    private static int SAMPLE_INTERVAL = 10;
+    private final static int SAMPLE_INTERVAL = 10;
 
     private final int[] argbTable;
     private final boolean isGlobal;
@@ -68,11 +68,10 @@ public class GifColorTable {
         return minIndex;
     }
 
-
     /**
      * Analyzes pixels and create color map.
      */
-    static GifColorTable create(int[] pixels) {
+    static GifColorTable create(int[] pixels, boolean asGlobal) {
 
         byte[] rgbPixels = new byte[pixels.length*3];
         for (int i = 0; i < pixels.length; i++) {
@@ -93,6 +92,15 @@ public class GifColorTable {
             result[i] = a | r | g | b;
         }
 
-        return new GifColorTable(result, false);
+        return new GifColorTable(result, asGlobal);
+    }
+
+    int[] indexColors(int[] argb) {
+        int[] result = new int[argb.length];
+
+        for (int i = 0; i < result.length; i++) {
+            result[i] = findClosestIndex(argb[i]);
+        }
+        return result;
     }
 }
