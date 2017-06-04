@@ -45,6 +45,7 @@ There are plenty of really good sources for the GIF standard.
 
 * https://www.w3.org/Graphics/GIF/spec-gif89a.txt
 * https://en.wikipedia.org/wiki/GIF
+* https://github.com/ata4/gifiddle
 
 
 Contribution
