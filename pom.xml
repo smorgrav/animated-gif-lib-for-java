@@ -6,7 +6,7 @@
     <packaging>jar</packaging>
     <name>Giffer</name>
     <description>
-        This is a library to encode, decode and create gif images and animations.
+        This is a library to encode, decode and construct gif images and animations.
         It is without dependencies to java.awt or any third party libraries making it
         suitable for e.g. google appengine.
     </description>

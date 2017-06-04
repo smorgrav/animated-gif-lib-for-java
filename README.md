@@ -27,6 +27,26 @@ To create an animation from two images:
                 .encode(outputstream);
 ```
 
+Roadmap
+=======
+I figured it would be great to make this generic enough to be usefull for others too.
+To achieve that the roadmap to a 1.0 version is as follows:
+
+1.0 Bug fixes
+0.9 Whatever is needed to publish it to the Central Maven repository
+0.8 Tune the Giffer build pattern
+0.7 Support Gif87a format
+0.6 Comment and plain text extensions
+0.5 Transparency and backgrounds
+
+Resources
+=========
+There are plenty of really good sources for the GIF standard.
+
+* https://www.w3.org/Graphics/GIF/spec-gif89a.txt
+* https://en.wikipedia.org/wiki/GIF
+
+
 Contribution
 ============
 
