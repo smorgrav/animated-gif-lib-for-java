@@ -15,10 +15,6 @@ class GifFrame {
         this.interlace = interlace;
     }
 
-    GifGraphicControlExt.DisposeMethod getDispose() {
-        return gce.getDispose();
-    }
-
     GifBitmap getBitmap()  {
         return bitmap;
     }

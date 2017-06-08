@@ -29,20 +29,22 @@ class GifBitmap {
      * <p>
      * The array layout must be equal or larger than this bitmap
      */
-    void renderTo(int[] argb, int argbWidth, GifGraphicControlExt ext) {
-        if (argb.length < width * height) {
-            throw new IllegalArgumentException("The target argb array is too small: " + argb.length);
+    void renderTo(int[] targetARGBArray, int targetWidth, GifGraphicControlExt ext) {
+        if (targetARGBArray.length < width * height) {
+            throw new IllegalArgumentException("The target argb array is too small: " + targetARGBArray.length);
         }
 
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < height; y++) {
                 int sourceIndex = y * width + x;
-                int targetIndex = (offsety + y) * argbWidth + offsetx + x;
+                int targetIndex = (offsety + y) * targetWidth + offsetx + x;
                 // Only set color on target if the current pixel is not transparent
                 if (!ext.hasTransparency() || ext.getTransparcyIndex() != colorIndices[sourceIndex]) {
                     int colorIndex = colorIndices[sourceIndex];
                     int color = colorTable.getColor(colorIndex);
-                    argb[targetIndex] = color;
+                    targetARGBArray[targetIndex] = color;
+                } else {
+                    int color = colorTable.getColor(ext.getTransparcyIndex());
                 }
             }
         }

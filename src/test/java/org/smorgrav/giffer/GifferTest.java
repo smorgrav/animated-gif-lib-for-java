@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -82,7 +83,7 @@ public class GifferTest {
     public void testBasicOutput() throws Exception {
         GifImage actual = Giffer.create()
                 .withLoopCount(0)
-                .withFrameDelay(40)
+                .withDelay(40)
                 .addFrame(sonic1, 290, 360, 0, 0)
                 .addFrame(sonic2)
                 .build();
@@ -98,7 +99,7 @@ public class GifferTest {
     public void testBackgroundColorWorksOnOversizeImage() throws Exception {
         GifImage actual = Giffer.create()
                 .withLoopCount(0)
-                .withFrameDelay(40)
+                .withDelay(40)
                 .withWidth(600)
                 .withHeight(600)
                 .withBackground(RED)
@@ -117,9 +118,9 @@ public class GifferTest {
     public void testTransparentColor() throws Exception {
         GifImage actual = Giffer.create()
                 .withLoopCount(0)
-                .withFrameDelay(40)
+                .withDelay(40)
                 .addFrame(sonic1, 290, 360, 0, 0)
-                .withFrameTransparency(BLUE)
+                .withTransparency(BLUE)
                 .addFrame(sonic2, 290, 360, 0, 0)
                 .build();
 
@@ -134,13 +135,15 @@ public class GifferTest {
     public void testBackgroundAndTransparent() throws Exception {
         GifImage actual = Giffer.create()
                 .withLoopCount(0)
-                .withFrameDelay(40)
+                .withDelay(40)
                 .withHeight(600)
                 .withWidth(600)
                 .withBackground(GREEN)
-                .withFrameTransparency(BLUE)
+                .withTransparency(BLUE)
+                .withDispose(GifDispose.RESTORE_TO_BACKGROUND)
                 .addFrame(sonic1, 290, 360, 0, 0)
                 .addFrame(sonic2, 290, 360, 0, 0)
+                .encode(new FileOutputStream("/Users/smorgrav/dev/privat/test-images/test2.gif"), true)
                 .build();
 
         GifImage expected = Giffer.create()

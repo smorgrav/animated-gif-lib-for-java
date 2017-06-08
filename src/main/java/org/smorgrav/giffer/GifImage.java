@@ -20,8 +20,8 @@ class GifImage {
     private final String version;
     private final int width;
     private final int height;
-    private final GifColorTable gct;
-    private final int backGroundIndex;
+    private final GifColorTable gct; /** Might be null */
+    private final int backGroundIndex; /** Only means something with gct is not null */
     private final int aspectRatio;
 
     /** Netscape 2.0 extension */
@@ -68,11 +68,11 @@ class GifImage {
         return width;
     }
 
-    public int getBackGroundIndex() {
+    int getBackGroundIndex() {
         return backGroundIndex;
     }
 
-    public int getAspectRatio() {
+    int getAspectRatio() {
         return aspectRatio;
     }
 
@@ -91,18 +91,22 @@ class GifImage {
         for (int i = 0; i <= frameNo;i++) {
                 GifFrame currentFrame = frames.get(i);
                 if (i < frameNo) {
-                    switch (currentFrame.getDispose()) {
+                    switch (currentFrame.getGraphicControlExt().getDispose()) {
                         case RESTORE_TO_BACKGROUND:
+                            if (gct == null) {
+                                throw new GifferException("Cannot restore to background without a global color table");
+                            }
                             currentFrame.getBitmap().renderWithColorTo(argb, width, gct.getColor(backGroundIndex));
                             break;
                         case NON_SPECIFIED:
-                        case RESTORE_TO_PREVIOUS:
                             break;
+                        case RESTORE_TO_PREVIOUS:
+                            break; //TODO implement this
                         case DO_NOT_DISPOSE:
                             currentFrame.getBitmap().renderTo(argb, width, currentFrame.getGraphicControlExt());
                             break;
                         default:
-                            throw new GifFormatException("Unknown dispose method: " + currentFrame.getDispose());
+                            throw new GifFormatException("Unknown dispose method: " + currentFrame.getGraphicControlExt().getDispose());
                     }
                 } else {
                     currentFrame.getBitmap().renderTo(argb, width, currentFrame.getGraphicControlExt());

@@ -347,7 +347,7 @@ class GifDecoder {
         read(); // block size
 
         int packed = read(); // packed fields
-        gce.setDisposeFromValue((packed & 0x1c) >> 2);
+        gce.setDispose(GifDispose.fromValue((packed & 0x1c) >> 2));
         gce.setTransparent((packed & 1) != 0);
         gce.setUserInputFlag((packed & 2) != 0);
 

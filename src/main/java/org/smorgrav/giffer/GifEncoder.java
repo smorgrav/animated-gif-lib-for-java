@@ -81,7 +81,7 @@ class GifEncoder {
         out.write(0xf9); // GCE label
         out.write(4); // data block size
 
-        int dispose = gce.getDisposeValue();
+        int dispose = gce.getDispose().getValue();
         dispose <<= 2;
         int transparency = gce.hasTransparency() ? 1 : 0;
         int packed = dispose | transparency;
