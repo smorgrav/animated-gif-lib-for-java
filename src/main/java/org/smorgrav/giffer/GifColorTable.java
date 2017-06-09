@@ -103,4 +103,18 @@ public class GifColorTable {
         }
         return result;
     }
+
+    /**
+     * Put the background color somewhere in the colortable.
+     *
+     * If it is already present - do nothing.
+     * Assume that the last entry is the least important - replace that.
+     */
+    int setBackground(int background) {
+        int current = findClosestIndex(background);
+        if (argbTable[current] == background) return current;
+
+        this.argbTable[this.argbTable.length - 1] = background;
+        return this.argbTable.length - 1;
+    }
 }

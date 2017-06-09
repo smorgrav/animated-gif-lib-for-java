@@ -3,6 +3,8 @@ package org.smorgrav.giffer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Gif workflow builder
@@ -14,6 +16,7 @@ import java.io.OutputStream;
  * TODO add support for text extension
  * TODO make methods indicate if for image or for frame, next or previous - maybe make separate Frame builder?
  * TODO add generic extension list instead of netscape ext as inlined
+ * TODO support short colortables
  *
  * @author smorgrav
  */
@@ -22,6 +25,7 @@ public class Giffer {
     private static String DEFAULT_VERSION = "GIF89a";
 
     private GifImage image;
+    private List<GifFrame> frames = new ArrayList<>();
     private FrameBuilder defaultFrame = new FrameBuilder();
     private int width = -1;
     private int height = -1;
@@ -31,13 +35,15 @@ public class Giffer {
     private int loopCount = 1;
     private boolean interlace = false;
     private int aspectRatio = 0;
+    private GifColorTable globalColorTable;
+    private boolean useGlobalColorTable = false;
 
     public class FrameBuilder {
         private int width = -1;
         private int height = -1;
         private int offsetx, offsety;
         private int[] argb;
-        private int[] colorTable;
+        private GifColorTable localColorTable;
         private int transparencyColor = 0;
         private boolean userInput = false;
         private boolean enableTransparency = false;
@@ -46,13 +52,6 @@ public class Giffer {
         private GifDispose dispose = GifDispose.NON_SPECIFIED;
 
         public FrameBuilder() {}
-
-        public FrameBuilder(int width, int height, int offsetx, int offsety) {
-            this.width = width;
-            this.height = height;
-            this.offsetx = offsetx;
-            this.offsety = offsety;
-        }
 
         public FrameBuilder(FrameBuilder source) {
             this.width = source.width;
@@ -99,53 +98,55 @@ public class Giffer {
             return this;
         }
 
+        public FrameBuilder withGlobalColorTable(boolean useGlobalNoLocal) {
+            this.useGlobalColorTable = useGlobalNoLocal;
+            return this;
+        }
 
         public Giffer build() {
             if (this.width == -1 || this.height == -1){
-                throw new GifferException("You must set the image width and height before adding sub images");
+                throw new GifferException("You must set the width and height before you can build a frame");
             }
 
-            if (colorTable != null) {
-
-            } else {
-
-            }
-            GifColorTable colorTable = GifColorTable.create(argb, false);
-            int[] colorIndices = colorTable.indexColors(argb);
-
-            GifGraphicControlExt currentGCE = new GifGraphicControlExt();
-            currentGCE.setDelay(delay);
-            currentGCE.setDispose(dispose);
-            currentGCE.setUserInputFlag(userInput);
-            if (enableTransparency) {
-                currentGCE.setTransparcyIndex(colorTable.findClosestIndex(transparencyColor));
-                currentGCE.setTransparent(enableTransparency);
-            }
-
-            if (image == null) {
-                GifColorTable gct;
-                //
-                // Decide on global colortable, abd background index on first frame
-                //
-                if (enableBackground) {
-                    GifBitmap backgroundMap = new GifBitmap(this.width, this.height, 0, 0, colorTable, colorIndices);
-                    int[] finalFirst = new int[this.width * this.height];
-                    backgroundMap.renderWithColorTo(finalFirst,width,backgroundColor);
-                    GifBitmap firstFrameMap = new GifBitmap(subWidth, subHeight, offsetx, offsety, colorTable, colorIndices);
-
-                    firstFrameMap.renderTo(finalFirst, this.width, currentGCE);
-                    gct = GifColorTable.create(finalFirst, true);
-                    backgroundIndex = gct.findClosestIndex(backgroundColor);
+            // Decide color table
+            if (localColorTable == null) {
+                if (useGlobalColorTable) {
+                    localColorTable = getGlobalColorTable();
                 } else {
-                    gct = GifColorTable.create(argb, true);
+                    localColorTable = GifColorTable.create(argb, false);
                 }
-
-                image = new GifImage(DEFAULT_VERSION, width, height, gct, backgroundIndex, aspectRatio);
-                image.setLoopCount(loopCount);
             }
 
-            image.addFrame(argb, subWidth, subHeight, offsetx, offsety, colorTable, currentGCE, interlace);
+            // Index raster
+            int[] colorIndices = localColorTable.indexColors(argb);
+            GifBitmap raster = new GifBitmap(width, height, offsetx, offsety, localColorTable, colorIndices);
+
+            // Create control extension
+            GifGraphicControlExt gce = new GifGraphicControlExt();
+            gce.setDelay(delay);
+            gce.setDispose(dispose);
+            gce.setUserInputFlag(userInput);
+            if (enableTransparency) {
+                gce.setTransparcyIndex(localColorTable.findClosestIndex(transparencyColor));
+                gce.setTransparent(enableTransparency);
+            }
+
+            // Add frame
+            frames.add(new GifFrame(raster, gce, interlace));
             return Giffer.this;
+        }
+
+        private GifColorTable getGlobalColorTable() {
+            if (globalColorTable != null) return globalColorTable;
+            if (enableBackground) {
+                if (argb == null) {
+                    globalColorTable = new GifColorTable(new int[256], true);
+                } else {
+                    globalColorTable = GifColorTable.create(argb, false);
+                }
+                globalColorTable.setBackground(backgroundColor);
+            }
+            return globalColorTable;
         }
     }
 
@@ -154,25 +155,35 @@ public class Giffer {
     }
 
     protected GifImage build() {
+        if (image == null) {
+                if (globalColorTable == null) {
+                    globalColorTable = new GifColorTable(new int[256], true);
+                    if (enableBackground) {
+                        backgroundIndex = globalColorTable.setBackground(backgroundColor);
+                    }
+                }
+                image = new GifImage(DEFAULT_VERSION, width, height, globalColorTable, backgroundIndex, aspectRatio);
+                image.setLoopCount(loopCount);
+                for (GifFrame frame : frames) {
+                    image.addFrame(frame);
+                }
+            }
         return image;
     }
 
-    public FrameBuilder addFrame(int argb[], int subWidth, int subHeight, int offsetx, int offsety) {
-        if (this.width == -1 && offsetx == 0 && this.height == -1 && offsety == 0) {
-            this.width = subWidth;
-            this.height = subHeight;
-        } else if (this.width == -1 || this.height == -1){
-            throw new GifferException("You must set the image width and height before adding sub images");
-        }
-
+    public FrameBuilder addFrame(int argb[], int frameWidth, int frameHeight, int offsetx, int offsety) {
         FrameBuilder frame = new FrameBuilder(defaultFrame);
-        frame.width = subWidth;
-        frame.height = subHeight;
+        frame.width = frameWidth;
+        frame.height = frameHeight;
         frame.offsetx = offsetx;
         frame.offsety = offsety;
-        return frame;
+        frame.argb = argb;
 
-        // Convert from argb values to indexed color raster
+        if (width == -1 || height == -1) {
+            width = frameWidth;
+            height = frameHeight;
+        }
+        return frame;
      }
 
     public FrameBuilder addFrame(int argb[]) {
@@ -194,6 +205,12 @@ public class Giffer {
         this.height = height;
         return this;
     }
+
+    public Giffer withGlobalColorTable(boolean useGlobalNoLocal) {
+        this.useGlobalColorTable = useGlobalNoLocal;
+        return this;
+    }
+
 
     public Giffer withBackground(int argb) {
         this.backgroundColor = argb;
@@ -240,7 +257,9 @@ public class Giffer {
     }
 
     public Giffer encode(OutputStream stream, boolean isComplete) {
-        if (image == null) throw new GifferException("No image decoded or created to encode");
+        if (image == null) {
+            build();
+        }
         try {
             GifEncoder.encode(image, stream, isComplete);
         } catch (IOException e) {
@@ -256,6 +275,9 @@ public class Giffer {
     }
 
     public Giffer encodeFrame(OutputStream outputStream) {
+        if (image == null) {
+            build();
+        }
         try {
             GifEncoder.encode(image.getFrames().get(image.getFrames().size() - 1), outputStream);
         } catch (IOException ioe) {
@@ -265,6 +287,9 @@ public class Giffer {
     }
 
     public int[] getARGBInts() {
+        if (image == null) {
+            build();
+        }
         return image.getARGBValues(image.getFrames().size() - 1);
     }
 }

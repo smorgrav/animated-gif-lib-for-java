@@ -19,10 +19,10 @@ import static org.junit.Assert.assertEquals;
  * Test the creation and composition of GifImages with various options.
  * <p>
  * Encoding and decoding is tested implicitly.
- *
+ * <p>
  * // TODO check if writing this out roundtrip("/brucelee.gif");
  * // TODO check if writing this out roundtrip("/brucelee-frame.gif");
- *
+ * <p>
  * TODO expand equals method/testing to also account for gct and frames equality
  */
 public class GifferTest {
@@ -65,7 +65,7 @@ public class GifferTest {
     public void create_single_gif_image_from_singlecolor_argb_values() {
         int red = 0xffff0000;
         int[] argb = new int[]{red, red, red, red, red, red, red, red, red};
-        GifImage image = Giffer.create().addFrame(argb, 3, 3, 0, 0).build();
+        GifImage image = Giffer.create().addFrame(argb, 3, 3, 0, 0).build().build();
 
         // Fetch rendered raster
         int[] rendered = image.getARGBValues(0);
@@ -84,8 +84,8 @@ public class GifferTest {
         GifImage actual = Giffer.create()
                 .withLoopCount(0)
                 .withDelay(40)
-                .addFrame(sonic1, 290, 360, 0, 0)
-                .addFrame(sonic2)
+                .addFrame(sonic1, 290, 360, 0, 0).build()
+                .addFrame(sonic2).build()
                 .build();
 
         GifImage expected = Giffer.create()
@@ -97,14 +97,16 @@ public class GifferTest {
 
     @Test
     public void testBackgroundColorWorksOnOversizeImage() throws Exception {
+
         GifImage actual = Giffer.create()
                 .withLoopCount(0)
                 .withDelay(40)
                 .withWidth(600)
                 .withHeight(600)
                 .withBackground(RED)
-                .addFrame(sonic1, 290, 360, 0, 0)
-                .addFrame(sonic2, 290, 360, 0, 0)
+                .addFrame(sonic1, 290, 360, 0, 0).build()
+                .addFrame(sonic2, 290, 360, 0, 0).build()
+                .encode(new FileOutputStream("/Users/smorgrav/dev/privat/test-images/test.gif"), false)
                 .build();
 
         GifImage expected = Giffer.create()
@@ -119,9 +121,9 @@ public class GifferTest {
         GifImage actual = Giffer.create()
                 .withLoopCount(0)
                 .withDelay(40)
-                .addFrame(sonic1, 290, 360, 0, 0)
+                .addFrame(sonic1, 290, 360, 0, 0).build()
                 .withTransparency(BLUE)
-                .addFrame(sonic2, 290, 360, 0, 0)
+                .addFrame(sonic2, 290, 360, 0, 0).build()
                 .build();
 
         GifImage expected = Giffer.create()
@@ -141,8 +143,8 @@ public class GifferTest {
                 .withBackground(GREEN)
                 .withTransparency(BLUE)
                 .withDispose(GifDispose.RESTORE_TO_BACKGROUND)
-                .addFrame(sonic1, 290, 360, 0, 0)
-                .addFrame(sonic2, 290, 360, 0, 0)
+                .addFrame(sonic1, 290, 360, 0, 0).build()
+                .addFrame(sonic2, 290, 360, 0, 0).build()
                 .encode(new FileOutputStream("/Users/smorgrav/dev/privat/test-images/test2.gif"), true)
                 .build();
 
@@ -158,7 +160,7 @@ public class GifferTest {
         int red = 0xffff0000;
         int[] argb = new int[]{red, red, red, red, red, red, red, red, red};
         ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
-        Giffer.create().addFrame(argb, 3, 3, 0, 0).encodeFrame(baos);
+        Giffer.create().addFrame(argb, 3, 3, 0, 0).build().encodeFrame(baos);
 
         byte[] result = baos.toByteArray();
         Assert.assertTrue(result.length > 100);
